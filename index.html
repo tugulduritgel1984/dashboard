@@ -6,6 +6,7 @@
 <title>Consolidated Plan 2026 — Дашбоард</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
   :root {
@@ -16,831 +17,179 @@
     --green: #2f9e44; --green-light: #ebfbee;
     --red: #e03131; --red-light: #fff5f5;
     --amber: #e67700; --amber-light: #fff9db;
-    --gray: #868e96; --gray-light: #f8f9fa;
-    --purple: #7048e8; --purple-light: #f3f0ff;
-    --purple: #7048e8; --purple-light: #f3f0ff;
     --radius: 8px; --radius-lg: 12px;
     --shadow: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.06);
-    --shadow-md: 0 4px 6px rgba(0,0,0,.07), 0 2px 4px rgba(0,0,0,.05);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.5; }
+  body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); font-size: 14px; }
 
-  /* Layout */
   .header { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; box-shadow: var(--shadow); }
-  .header-left { display: flex; align-items: center; gap: 12px; }
-  .logo { width: 32px; height: 32px; background: var(--blue); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 14px; }
-  .header-title { font-size: 16px; font-weight: 600; }
-  .header-sub { font-size: 12px; color: var(--text2); }
-  .last-updated { font-size: 11px; color: var(--text3); background: var(--bg3); padding: 4px 10px; border-radius: 20px; }
-
+  .logo { width: 32px; height: 32px; background: var(--blue); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; }
   .container { max-width: 1400px; margin: 0 auto; padding: 20px 24px; }
 
-  /* Upload */
-  .upload-wrap { margin-bottom: 20px; }
-  .upload-zone { border: 2px dashed var(--border2); border-radius: var(--radius-lg); padding: 32px; text-align: center; cursor: pointer; transition: all .2s; background: var(--bg2); }
-  .upload-zone:hover, .upload-zone.drag { border-color: var(--blue); background: var(--blue-light); }
-  .upload-zone.loaded { border-color: var(--green); background: var(--green-light); border-style: solid; padding: 16px; }
-  .upload-icon { font-size: 36px; margin-bottom: 10px; }
-  .upload-title { font-size: 15px; font-weight: 500; margin-bottom: 4px; }
-  .upload-sub { font-size: 12px; color: var(--text2); }
-  .upload-meta { display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; }
-  .upload-file-info { font-size: 13px; font-weight: 500; color: var(--green); }
-  .btn-reset { font-size: 12px; padding: 4px 12px; border: 1px solid var(--border2); border-radius: 20px; background: white; color: var(--text2); cursor: pointer; transition: all .15s; }
-  .btn-reset:hover { background: var(--red-light); border-color: var(--red); color: var(--red); }
-
-  /* Stats */
+  /* GitHub Auto-Load Banner */
+  .sync-banner { background: #e7f5ff; border: 1px solid #74c0fc; padding: 12px; border-radius: var(--radius); margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+  
   .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin-bottom: 20px; }
   .stat-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px; box-shadow: var(--shadow); }
-  .stat-num { font-size: 28px; font-weight: 600; line-height: 1; margin-bottom: 4px; }
-  .stat-lbl { font-size: 11px; color: var(--text2); font-weight: 500; text-transform: uppercase; letter-spacing: .4px; }
-  .stat-card.c-blue .stat-num { color: var(--blue); }
-  .stat-card.c-green .stat-num { color: var(--green); }
-  .stat-card.c-red .stat-num { color: var(--red); }
-  .stat-card.c-amber .stat-num { color: var(--amber); }
-  .stat-card.c-gray .stat-num { color: var(--gray); }
-  .stat-card.c-purple .stat-num { color: var(--purple); }
-  .stat-card.c-purple .stat-num { color: var(--purple); }
-
-  /* Tabs */
-  .tabs { display: flex; gap: 2px; border-bottom: 2px solid var(--border); margin-bottom: 16px; }
-  .tab { padding: 8px 18px; font-size: 13px; font-weight: 500; cursor: pointer; border: none; background: none; color: var(--text2); border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all .15s; border-radius: 6px 6px 0 0; }
-  .tab:hover { background: var(--bg3); color: var(--text); }
-  .tab.active { color: var(--blue); border-bottom-color: var(--blue); background: var(--blue-light); }
+  .stat-num { font-size: 24px; font-weight: 600; color: var(--blue); }
+  
+  .tabs { display: flex; gap: 5px; border-bottom: 2px solid var(--border); margin-bottom: 16px; }
+  .tab { padding: 10px 20px; cursor: pointer; border: none; background: none; color: var(--text2); }
+  .tab.active { color: var(--blue); border-bottom: 2px solid var(--blue); font-weight: 600; }
+  
   .view { display: none; }
   .view.active { display: block; }
-
-  /* Filters */
-  .filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; align-items: center; }
-  .filters select, .filters input { font-size: 12px; padding: 6px 10px; border: 1px solid var(--border2); border-radius: var(--radius); background: var(--bg2); color: var(--text); outline: none; transition: border-color .15s; }
-  .filters select:focus, .filters input:focus { border-color: var(--blue); }
-  .filter-count { font-size: 11px; color: var(--text3); background: var(--bg3); padding: 4px 10px; border-radius: 20px; }
-
-  /* Table */
-  .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow); }
-  table { width: 100%; border-collapse: collapse; font-size: 12px; table-layout: fixed; }
-  thead th { background: var(--bg3); padding: 9px 12px; font-size: 11px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: .4px; border-bottom: 1px solid var(--border); text-align: left; white-space: nowrap; }
-  tbody td { padding: 8px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  tbody td.td-name { white-space: normal; word-break: break-word; line-height: 1.45; overflow: visible; text-overflow: unset; }
-  tbody tr:last-child td { border-bottom: none; }
-  tbody tr:hover td { background: var(--bg3); }
-
-  /* Badges */
-  .badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 600; white-space: nowrap; }
+  
+  .table-wrap { overflow-x: auto; background: white; border-radius: var(--radius); border: 1px solid var(--border); }
+  table { width: 100%; border-collapse: collapse; }
+  th { background: var(--bg3); padding: 12px; text-align: left; font-size: 11px; text-transform: uppercase; }
+  td { padding: 12px; border-bottom: 1px solid var(--border); }
+  
+  .badge { padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 600; }
   .b-done { background: var(--green-light); color: var(--green); }
-  .b-late { background: var(--red-light); color: var(--red); }
   .b-prog { background: var(--blue-light); color: var(--blue); }
-  .b-pend { background: var(--bg3); color: var(--gray); }
-  .b-nst  { background: var(--amber-light); color: var(--amber); }
 
-  /* Progress bar */
-  .pbar { height: 4px; border-radius: 2px; background: var(--bg3); margin-top: 3px; min-width: 60px; }
-  .pfill { height: 100%; border-radius: 2px; transition: width .3s; }
-
-  /* Pagination */
-  .pag { display: flex; gap: 8px; align-items: center; margin-top: 14px; font-size: 12px; color: var(--text2); }
-  .pag button { padding: 5px 14px; border: 1px solid var(--border2); border-radius: var(--radius); background: var(--bg2); color: var(--text); cursor: pointer; font-size: 12px; transition: all .15s; }
-  .pag button:hover { background: var(--blue-light); border-color: var(--blue); color: var(--blue); }
-  .pag button:disabled { opacity: .4; cursor: not-allowed; }
-
-  /* Gantt */
-  .gantt-container { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow-x: auto; box-shadow: var(--shadow); }
-  .gantt-header { display: flex; background: var(--bg3); border-bottom: 1px solid var(--border); }
-  .gantt-label-header { min-width: 240px; padding: 8px 12px; font-size: 11px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: .4px; border-right: 1px solid var(--border); }
-  .gantt-months { display: flex; flex: 1; }
-  .gantt-month { flex: 1; text-align: center; padding: 8px 4px; font-size: 11px; font-weight: 600; color: var(--text2); border-right: 1px solid var(--border); }
-  .gantt-month:last-child { border-right: none; }
-  .gantt-row { display: flex; border-bottom: 1px solid var(--border); align-items: center; min-height: 30px; }
-  .gantt-row:last-child { border-bottom: none; }
-  .gantt-row:hover { background: var(--bg3); }
-  .gantt-task-name { min-width: 240px; padding: 5px 12px; font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; border-right: 1px solid var(--border); color: var(--text); }
-  .gantt-bars { flex: 1; position: relative; height: 30px; }
-  .today-line { position: absolute; width: 1.5px; height: 100%; top: 0; background: var(--red); opacity: .5; z-index: 2; }
-  .gantt-bar { position: absolute; height: 14px; top: 8px; border-radius: 3px; opacity: .85; transition: opacity .15s; }
-  .gantt-bar:hover { opacity: 1; }
-  .gantt-bar-fill { position: absolute; height: 14px; top: 8px; border-radius: 3px; opacity: 1; }
-  .gantt-pct { position: absolute; font-size: 9px; color: white; top: 10px; left: 4px; white-space: nowrap; overflow: hidden; pointer-events: none; }
-  .gantt-legend { display: flex; gap: 16px; padding: 10px 14px; border-top: 1px solid var(--border); font-size: 11px; color: var(--text2); flex-wrap: wrap; }
-  .gantt-legend span { display: flex; align-items: center; gap: 5px; }
-  .gantt-legend i { display: inline-block; width: 12px; height: 8px; border-radius: 2px; }
-
-  /* Dept chart */
-  .dept-wrap { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; box-shadow: var(--shadow); margin-bottom: 16px; }
-  .dept-table-wrap { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow); }
-  .dept-table-wrap table th { background: var(--bg3); }
-
-  /* Alerts */
-  .alert { padding: 10px 14px; border-radius: var(--radius); margin-bottom: 8px; font-size: 12px; border-left: 3px solid; }
-  .alert-r { background: var(--red-light); border-color: var(--red); }
-  .alert-y { background: var(--amber-light); border-color: var(--amber); }
-  .alert-g { background: var(--green-light); border-color: var(--green); }
-  .alert strong { font-weight: 600; }
-  .sec-title { font-size: 11px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: .5px; margin: 16px 0 8px; }
-  .sec-title:first-child { margin-top: 0; }
-
-  /* Loading */
-  .loading { text-align: center; padding: 40px; color: var(--text2); }
-  .spinner { width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--blue); border-radius: 50%; animation: spin .8s linear infinite; margin: 0 auto 12px; }
+  #loadingEl { text-align: center; padding: 50px; }
+  .spinner { border: 4px solid rgba(0,0,0,0.1); width: 36px; height: 36px; border-radius: 50%; border-left-color: var(--blue); animation: spin 1s linear infinite; display: inline-block; }
   @keyframes spin { to { transform: rotate(360deg); } }
-
-  /* Empty state */
-  .empty { text-align: center; padding: 48px; color: var(--text2); }
-  .empty-icon { font-size: 40px; margin-bottom: 12px; }
-  .empty-title { font-size: 15px; font-weight: 500; margin-bottom: 6px; color: var(--text); }
-
-  /* Card */
-  .card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow); }
 </style>
 </head>
 <body>
 
 <div class="header">
-  <div class="header-left">
+  <div style="display:flex; align-items:center; gap:12px;">
     <div class="logo">CP</div>
     <div>
-      <div class="header-title">Consolidated Plan 2026</div>
-      <div class="header-sub">Төслийн удирдлагын дашбоард</div>
+      <div style="font-weight:600">Consolidated Plan 2026</div>
+      <div style="font-size:12px; color:var(--text2)">GitHub Live Dashboard</div>
     </div>
   </div>
-  <span class="last-updated" id="lastUpdated">Файл уншигдаагүй байна</span>
+  <span id="lastUpdated" style="font-size:11px; color:var(--text3)">Уншиж байна...</span>
 </div>
 
 <div class="container">
-
-  <div style="background:#ebfbee;border:1px solid #2f9e44;border-radius:10px;padding:12px 18px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
-    <div style="display:flex;align-items:center;gap:10px">
-      <span style="font-size:20px">✅</span>
-      <div>
-        <div style="font-size:13px;font-weight:600;color:#2f9e44">Consolidated Plan 2026 — өгөгдөл шингээгдсэн</div>
-        <div style="font-size:11px;color:#6c757d">249 ажил · Нийт зардал: 371,668,000 ₮ · 3/19/2026</div>
-      </div>
-    </div>
-    <div style="font-size:11px;color:#6c757d;background:white;padding:5px 12px;border-radius:20px;border:1px solid #dee2e6">Шинэчлэгдсэн: 2026-03-19</div>
+  <div class="sync-banner">
+    <div style="font-size: 13px;"><strong>GitHub Sync:</strong> Өгөгдлийг <code>database.xlsx</code>-ээс автоматаар уншиж байна.</div>
+    <input type="file" id="fileInput" hidden onchange="handleManualFile(this.files[0])">
+    <button onclick="document.getElementById('fileInput').click()" style="font-size:11px; padding:4px 8px; cursor:pointer;">Файл гараар сонгох</button>
   </div>
 
+  <div id="loadingEl"><div class="spinner"></div><p>Мэдээллийг боловсруулж байна...</p></div>
 
-  <!-- Dashboard -->
   <div id="dashContent" style="display:none">
-
-    <!-- Stats -->
     <div class="stats" id="statsEl"></div>
 
-    <!-- Tabs -->
     <div class="tabs">
-      <button class="tab active" onclick="showTab('list',this)">📋 Ажлын жагсаалт</button>
-      <button class="tab" onclick="showTab('gantt',this)">📊 Гантт диаграм</button>
-      <button class="tab" onclick="showTab('dept',this)">🏢 Хэлтэсийн дүн</button>
-      <button class="tab" onclick="showTab('alerts',this)">🔔 Анхааруулга</button>
-      <button class="tab" onclick="showTab('cost',this)">💰 Зардал</button>
+      <div class="tab active" onclick="switchTab('list', this)">📋 Ажлын жагсаалт</div>
+      <div class="tab" onclick="switchTab('charts', this)">📊 График</div>
     </div>
 
-    <!-- List -->
     <div id="list" class="view active">
-      <div class="filters">
-        <select id="fDept" onchange="renderList()"><option value="">Бүх хэлтэс</option></select>
-        <select id="fStatus" onchange="renderList()">
-          <option value="">Бүх төлөв</option>
-          <option value="in_progress">Явагдаж байна</option>
-          <option value="not_started">Эхлээгүй</option>
-          <option value="pending">Төлөвлөсөн</option>
-          <option value="late">Хоцролттой</option>
-          <option value="done">Дууссан</option>
-        </select>
-        <input type="text" id="fSearch" placeholder="🔍 Хайх..." oninput="curPage=1;renderList()" style="width:200px">
-        <span class="filter-count" id="filterCount"></span>
-      </div>
       <div class="table-wrap">
         <table>
-          <thead><tr>
-            <th style="width:44%">Ажлын нэр</th>
-            <th style="width:10%">Хэлтэс</th>
-            <th style="width:9%">Эхлэх</th>
-            <th style="width:9%">Дуусах</th>
-            <th style="width:15%">Биелэлт</th>
-            <th style="width:10%">Төлөв</th>
-            <th style="width:10%">Хугацаа</th>
-          </tr></thead>
+          <thead>
+            <tr><th>Ажлын нэр</th><th>Хэлтэс</th><th>Биелэлт</th><th>Төлөв</th></tr>
+          </thead>
           <tbody id="listBody"></tbody>
         </table>
       </div>
-      <div class="pag">
-        <button id="prevBtn" onclick="changePage(-1)">‹ Өмнөх</button>
-        <span id="pageInfo" style="min-width:140px;text-align:center"></span>
-        <button id="nextBtn" onclick="changePage(1)">Дараах ›</button>
-      </div>
     </div>
 
-    <!-- Gantt -->
-    <div id="gantt" class="view">
-      <div class="filters">
-        <select id="gDept" onchange="renderGantt()"><option value="">Бүх хэлтэс</option></select>
-        <select id="gQtr" onchange="renderGantt()">
-          <option value="">Жилийн хэмжээнд</option>
-          <option value="1">1-р улирал (1–3 сар)</option>
-          <option value="2">2-р улирал (4–6 сар)</option>
-          <option value="3">3-р улирал (7–9 сар)</option>
-          <option value="4">4-р улирал (10–12 сар)</option>
-        </select>
-      </div>
-      <div class="gantt-container" id="ganttEl"></div>
+    <div id="charts" class="view">
+        <div style="max-width: 600px; margin: auto;"><canvas id="deptChart"></canvas></div>
     </div>
-
-    <!-- Dept -->
-    <div id="dept" class="view">
-      <div class="dept-wrap">
-        <div style="position:relative;height:280px"><canvas id="deptChart"></canvas></div>
-      </div>
-      <div class="dept-table-wrap">
-        <table>
-          <thead><tr>
-            <th>Хэлтэс</th>
-            <th style="text-align:right">Нийт</th>
-            <th style="text-align:right">Явагдаж байна</th>
-            <th style="text-align:right">Дууссан</th>
-            <th style="text-align:right">Хоцролттой</th>
-            <th style="text-align:right">Эхлээгүй</th>
-            <th style="text-align:right">Төлөвлөсөн</th>
-            <th style="width:200px;text-align:right">Дундаж биелэлт</th>
-          </tr></thead>
-          <tbody id="deptBody"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- Alerts -->
-    <div id="alerts" class="view" id="alertsEl"></div>
-    <div id="cost" class="view"><div id="costContent"></div></div>
-
   </div>
 </div>
 
 <script>
-let ALL_TASKS = [], DEPTS = [], filtered = [], curPage = 1;
-const PAGE_SIZE = 30;
-const TODAY = new Date(); TODAY.setHours(0,0,0,0);
-let deptChart = null;
+let ALL_TASKS = [];
+const EXCEL_FILE_PATH = 'database.xlsx'; // Make sure your file is named exactly this in GitHub
 
-// ── FILE HANDLING ──────────────────────────────────────────────────────────
-function handleDrop(ev) {
-  ev.preventDefault();
-  document.getElementById('dropZone').classList.remove('drag');
-  const f = ev.dataTransfer.files[0];
-  if (f) handleFile(f);
-}
-
-function handleFile(file) {
-  if (!file) return;
-  document.getElementById('loadingEl').style.display = 'block';
-  document.getElementById('dashContent').style.display = 'none';
-  const reader = new FileReader();
-  reader.onload = e => {
-    try { parseExcel(e.target.result, file.name); }
-    catch (err) {
-      document.getElementById('loadingEl').style.display = 'none';
-      alert('Алдаа гарлаа: ' + err.message + '\n\nБаганын нэрийг шалгана уу.');
-    }
-  };
-  reader.readAsArrayBuffer(file);
-}
-
-function parseExcel(buf, fileName) {
-  const wb = XLSX.read(buf, { type: 'array', cellDates: true });
-  const ws = wb.Sheets[wb.SheetNames[0]];
-  const rows = XLSX.utils.sheet_to_json(ws, { raw: false, defval: '' });
-  if (!rows.length) throw new Error('Хоосон файл');
-
-  const keys = Object.keys(rows[0]);
-  // Exact match first, then partial match
-  const findExact = (...names) => {
-    for (const n of names) {
-      const k = keys.find(k => k.toLowerCase() === n.toLowerCase());
-      if (k) return k;
-    }
-    return null;
-  };
-  const find = (...patterns) => {
-    for (const p of patterns) {
-      const k = keys.find(k => k.toLowerCase().replace(/[_\s]/g,'').includes(p.toLowerCase().replace(/[_\s]/g,'')));
-      if (k) return k;
-    }
-    return null;
-  };
-
-  // Name: exact match эхлээд хайна — Resource_Names-тэй андуурахгүйн тулд
-  const cName   = findExact('name','task_name','taskname') || find('taskname','нэр');
-  const cStart  = findExact('start','start_date','startdate') || find('startdate','start','эхлэх');
-  const cFinish = findExact('finish','finish_date','finishdate','end','end_date') || find('finishdate','finish','дуусах');
-  const cPct    = findExact('percent_complete','percentcomplete','%_complete') || find('percentcomplete','percent','pct','биелэлт');
-  const cDept   = findExact('resource_names','resourcenames','resource','dept') || find('resourcenames','хэлтэс','алба');
-  const cDur    = findExact('duration','хугацаа') || find('duration');
-  const cActS   = findExact('actual_start','actualstart') || find('actualstart');
-  const cActF   = findExact('actual_finish','actualfinish') || find('actualfinish');
-  const cDead   = findExact('deadline','эцсийн') || find('deadline');
-
-  if (!cName || !cStart || !cFinish) throw new Error(`Шаардлагатай багана олдсонгүй.\nОлдсон баганууд: ${keys.join(', ')}`);
-
-  function parseD(v) {
-    if (!v || v === '') return null;
-    if (v instanceof Date) return isNaN(v) ? null : v;
-    const d = new Date(v);
-    return isNaN(d) ? null : d;
-  }
-  function parsePct(v) {
-    if (v === '' || v == null) return 0;
-    const n = parseFloat(String(v).replace('%',''));
-    return isNaN(n) ? 0 : n > 1 ? Math.round(n) : Math.round(n * 100);
-  }
-  function getStatus(s, f, pct, actF) {
-    if (pct >= 100 || actF) return 'done';
-    if (!s || s > TODAY) return 'pending';
-    if (TODAY > f && pct < 100) return 'late';
-    if (pct === 0 && s <= TODAY) return 'not_started';
-    return 'in_progress';
-  }
-
-  ALL_TASKS = [];
-  rows.forEach((row, i) => {
-    const name = String(row[cName] || '').trim();
-    if (!name || name === 'nan') return;
-    const start = parseD(row[cStart]);
-    const finish = parseD(row[cFinish]);
-    if (!start || !finish) return;
-    const pct  = parsePct(cPct ? row[cPct] : 0);
-    const dept = cDept ? String(row[cDept] || '').trim() : '';
-    const actS = cActS ? parseD(row[cActS]) : null;
-    const actF = cActF ? parseD(row[cActF]) : null;
-    const dead = cDead ? parseD(row[cDead]) : null;
-    ALL_TASKS.push({
-      id: i+1, name, dept,
-      start, finish, actS, actF, dead,
-      pct, status: getStatus(start, finish, pct, actF),
-      duration: cDur ? String(row[cDur] || '') : ''
-    });
-  });
-
-  if (!ALL_TASKS.length) throw new Error('Ажил олдсонгүй');
-  DEPTS = [...new Set(ALL_TASKS.map(t => t.dept).filter(Boolean))].sort();
-
-  // Update UI
-  document.getElementById('loadingEl').style.display = 'none';
-  document.getElementById('dashContent').style.display = 'block';
-
-  const dz = document.getElementById('dropZone');
-  dz.classList.add('loaded');
-  document.getElementById('uploadContent').style.display = 'none';
-  document.getElementById('uploadedContent').style.display = 'block';
-  document.getElementById('fileInfoText').textContent = '📄 ' + fileName;
-  document.getElementById('fileSubText').textContent = ALL_TASKS.length + ' ажил амжилттай уншигдлаа';
-
-  const now = new Date();
-  document.getElementById('lastUpdated').textContent = `Шинэчлэгдсэн: ${now.toLocaleDateString('mn-MN')} ${now.toLocaleTimeString('mn-MN', {hour:'2-digit',minute:'2-digit'})}`;
-
-  initFilters();
-  renderStats();
-  curPage = 1;
-  renderList();
-}
-
-function resetUpload() {
-  ALL_TASKS = []; DEPTS = []; filtered = [];
-  const dz = document.getElementById('dropZone');
-  dz.classList.remove('loaded');
-  document.getElementById('uploadContent').style.display = 'block';
-  document.getElementById('uploadedContent').style.display = 'none';
-  document.getElementById('dashContent').style.display = 'none';
-  document.getElementById('fileInput').value = '';
-  document.getElementById('lastUpdated').textContent = 'Файл уншигдаагүй байна';
-  if (deptChart) { deptChart.destroy(); deptChart = null; }
-}
-
-// ── HELPERS ────────────────────────────────────────────────────────────────
-const STATUS_MAP = {
-  done:        ['b-done', 'Дууссан'],
-  in_progress: ['b-prog', 'Явагдаж байна'],
-  late:        ['b-late', 'Хоцролттой'],
-  not_started: ['b-nst',  'Эхлээгүй'],
-  pending:     ['b-pend', 'Төлөвлөсөн']
+// 1. Auto-load from GitHub on Startup
+window.onload = function() {
+    fetch(EXCEL_FILE_PATH)
+        .then(res => {
+            if (!res.ok) throw new Error("Excel файл олдсонгүй");
+            return res.arrayBuffer();
+        })
+        .then(buffer => parseExcel(buffer))
+        .catch(err => {
+            console.error(err);
+            document.getElementById('loadingEl').innerHTML = "⚠️ GitHub дээр 'database.xlsx' файл олдсонгүй. Гараар оруулна уу.";
+        });
 };
-function badge(s) {
-  const [cls, lbl] = STATUS_MAP[s] || ['b-pend','?'];
-  return `<span class="badge ${cls}">${lbl}</span>`;
-}
-function pbar(pct) {
-  const c = pct >= 100 ? '#2f9e44' : pct > 0 ? '#228be6' : '#adb5bd';
-  return `<div style="font-size:11px;font-weight:500">${pct}%<div class="pbar"><div class="pfill" style="width:${Math.min(100,pct)}%;background:${c}"></div></div></div>`;
-}
-function fmtDate(d) {
-  if (!d) return '';
-  return d.toLocaleDateString('mn-MN', { month:'2-digit', day:'2-digit' });
+
+function handleManualFile(file) {
+    const reader = new FileReader();
+    reader.onload = e => parseExcel(e.target.result);
+    reader.readAsArrayBuffer(file);
 }
 
-// ── INIT FILTERS ───────────────────────────────────────────────────────────
-function initFilters() {
-  ['fDept','gDept'].forEach(id => {
-    const el = document.getElementById(id);
-    while (el.options.length > 1) el.remove(1);
-    DEPTS.forEach(d => { const o = document.createElement('option'); o.value = d; o.textContent = d; el.appendChild(o); });
-  });
-}
+function parseExcel(data) {
+    const workbook = XLSX.read(data, { type: 'array' });
+    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(firstSheet);
 
-// ── STATS ──────────────────────────────────────────────────────────────────
-function renderStats() {
-  const n       = ALL_TASKS.length;
-  const done    = ALL_TASKS.filter(t => t.status === 'done').length;
-  const prog    = ALL_TASKS.filter(t => t.status === 'in_progress').length;
-  const late    = ALL_TASKS.filter(t => t.status === 'late').length;
-  const nst     = ALL_TASKS.filter(t => t.status === 'not_started').length;
-  const pending = ALL_TASKS.filter(t => t.status === 'pending').length;
-  const avg     = n ? Math.round(ALL_TASKS.reduce((s,t) => s+t.pct, 0) / n) : 0;
-  document.getElementById('statsEl').innerHTML = `
-    <div class="stat-card"><div class="stat-num">${n}</div><div class="stat-lbl">Нийт ажил</div></div>
-    <div class="stat-card c-blue"><div class="stat-num">${prog}</div><div class="stat-lbl">Явагдаж байна</div></div>
-    <div class="stat-card c-green"><div class="stat-num">${done}</div><div class="stat-lbl">Дууссан</div></div>
-    <div class="stat-card c-red"><div class="stat-num">${late}</div><div class="stat-lbl">Хоцролттой</div></div>
-    <div class="stat-card c-amber"><div class="stat-num">${nst}</div><div class="stat-lbl">Эхлээгүй</div></div>
-    <div class="stat-card c-purple"><div class="stat-num">${pending}</div><div class="stat-lbl">Төлөвлөсөн</div></div>
-    <div class="stat-card c-gray"><div class="stat-num">${avg}%</div><div class="stat-lbl">Дундаж биелэлт</div></div>
-  `;
-}
+    // Map your MS Project columns here
+    ALL_TASKS = rows.map(row => ({
+        name: row['Name'] || row['Task Name'] || 'Нэргүй',
+        dept: row['Resource Names'] || row['Department'] || 'Тодорхойгүй',
+        pct: parseFloat(row['% Complete']) || 0,
+        status: row['Status'] || (parseFloat(row['% Complete']) >= 100 ? 'Дууссан' : 'Явагдаж байна')
+    }));
 
-// ── LIST ───────────────────────────────────────────────────────────────────
-function renderList() {
-  const dept   = document.getElementById('fDept').value;
-  const status = document.getElementById('fStatus').value;
-  const search = document.getElementById('fSearch').value.toLowerCase();
-  filtered = ALL_TASKS.filter(t =>
-    (!dept   || t.dept === dept) &&
-    (!status || t.status === status) &&
-    (!search || t.name.toLowerCase().includes(search) || t.dept.toLowerCase().includes(search))
-  );
-  const total = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-  if (curPage > total) curPage = 1;
-  const page = filtered.slice((curPage-1)*PAGE_SIZE, curPage*PAGE_SIZE);
-  document.getElementById('filterCount').textContent = `${filtered.length} ажил`;
-  document.getElementById('listBody').innerHTML = page.map(t => `<tr>
-    <td class="td-name">${t.name}</td>
-    <td style="color:var(--text2)">${t.dept}</td>
-    <td>${fmtDate(t.start)}</td>
-    <td>${fmtDate(t.finish)}</td>
-    <td>${pbar(t.pct)}</td>
-    <td>${badge(t.status)}</td>
-    <td style="color:var(--text2);font-size:11px">${t.duration}</td>
-  </tr>`).join('');
-  document.getElementById('pageInfo').textContent = `${curPage} / ${total} хуудас`;
-  document.getElementById('prevBtn').disabled = curPage <= 1;
-  document.getElementById('nextBtn').disabled = curPage >= total;
-}
-function changePage(d) {
-  const total = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-  curPage = Math.max(1, Math.min(total, curPage + d));
-  renderList();
-}
-
-// ── GANTT ──────────────────────────────────────────────────────────────────
-function renderGantt() {
-  const dept = document.getElementById('gDept').value;
-  const qtr  = document.getElementById('gQtr').value;
-  const yr   = ALL_TASKS.length ? Math.min(...ALL_TASKS.map(t => t.start.getFullYear())) : TODAY.getFullYear();
-
-  let sd = new Date(yr, 0, 1), ed = new Date(yr, 11, 31);
-  if (qtr === '1') { sd = new Date(yr,0,1);  ed = new Date(yr,2,31); }
-  if (qtr === '2') { sd = new Date(yr,3,1);  ed = new Date(yr,5,30); }
-  if (qtr === '3') { sd = new Date(yr,6,1);  ed = new Date(yr,8,30); }
-  if (qtr === '4') { sd = new Date(yr,9,1);  ed = new Date(yr,11,31); }
-
-  const data = ALL_TASKS.filter(t =>
-    (!dept || t.dept === dept) && t.finish >= sd && t.start <= ed
-  );
-
-  const totalMs = ed - sd;
-  const months = [];
-  let d = new Date(sd);
-  while (d <= ed) { months.push(new Date(d)); d.setMonth(d.getMonth()+1); }
-
-  const todayPct = Math.max(0, Math.min(100, (TODAY - sd) / totalMs * 100));
-
-  const COLORS = {
-    in_progress: '#228be6', done: '#2f9e44',
-    late: '#e03131', not_started: '#e67700', pending: '#7048e8'
-  };
-
-  function p(date) { return Math.max(0, Math.min(100, (date - sd) / totalMs * 100)); }
-
-  let html = `<div class="gantt-header">
-    <div class="gantt-label-header">Ажлын нэр</div>
-    <div class="gantt-months">
-    ${months.map(m => {
-      const days = new Date(m.getFullYear(), m.getMonth()+1, 0).getDate();
-      return `<div class="gantt-month" style="flex:${days}">${m.getMonth()+1}р сар</div>`;
-    }).join('')}
-    </div>
-  </div>`;
-
-  if (!data.length) {
-    html += `<div class="empty"><div class="empty-icon">📭</div><div class="empty-title">Энэ хугацаанд ажил байхгүй байна</div></div>`;
-  } else {
-    data.slice(0, 100).forEach(t => {
-      const sp = p(t.start), ep = p(t.finish);
-      const clr = COLORS[t.status] || '#adb5bd';
-      const fillW = (ep - sp) * t.pct / 100;
-      html += `<div class="gantt-row">
-        <div class="gantt-task-name" title="${t.name}">${t.name.slice(0,34)}</div>
-        <div class="gantt-bars">
-          <div class="today-line" style="left:${todayPct}%"></div>
-          <div class="gantt-bar" style="left:${sp}%;width:${Math.max(.4,ep-sp)}%;background:${clr};opacity:.3"></div>
-          ${t.pct > 0 ? `<div class="gantt-bar-fill" style="left:${sp}%;width:${Math.max(.2,fillW)}%;background:${clr}"></div>` : ''}
-          ${t.pct > 0 ? `<div class="gantt-pct" style="left:${sp+.5}%;max-width:${Math.max(.2,ep-sp)}%">${t.pct}%</div>` : ''}
-        </div>
-      </div>`;
-    });
-    if (data.length > 100) html += `<div style="padding:10px 14px;font-size:11px;color:var(--text2)">${data.length-100} ажил харагдахгүй байна — хэлтсээр шүүнэ үү</div>`;
-  }
-
-  html += `<div class="gantt-legend">
-    <span><i style="background:#228be6"></i> Явагдаж байна</span>
-    <span><i style="background:#2f9e44"></i> Дууссан</span>
-    <span><i style="background:#e03131"></i> Хоцролттой</span>
-    <span><i style="background:#e67700"></i> Эхлээгүй</span>
-    <span><i style="background:#7048e8"></i> Төлөвлөсөн</span>
-    <span style="color:var(--text2)">│ <span style="color:#e03131;font-weight:500">Улаан зураас</span> = өнөөдөр</span>
-  </div>`;
-
-  document.getElementById('ganttEl').innerHTML = html;
-}
-
-// ── DEPT ───────────────────────────────────────────────────────────────────
-function renderDept() {
-  const stats = DEPTS.map(d => {
-    const dt = ALL_TASKS.filter(t => t.dept === d);
-    return {
-      dept: d, total: dt.length,
-      done:    dt.filter(t => t.status === 'done').length,
-      prog:    dt.filter(t => t.status === 'in_progress').length,
-      late:    dt.filter(t => t.status === 'late').length,
-      nst:     dt.filter(t => t.status === 'not_started').length,
-      pending: dt.filter(t => t.status === 'pending').length,
-      avg:     dt.length ? Math.round(dt.reduce((s,t) => s+t.pct, 0) / dt.length) : 0
-    };
-  });
-
-  const ctx = document.getElementById('deptChart');
-  if (deptChart) { deptChart.destroy(); }
-  deptChart = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: stats.map(s => s.dept),
-      datasets: [
-        { label: 'Явагдаж байна', data: stats.map(s => s.prog), backgroundColor: '#228be6', borderRadius: 4 },
-        { label: 'Дууссан',       data: stats.map(s => s.done), backgroundColor: '#2f9e44', borderRadius: 4 },
-        { label: 'Хоцролттой',    data: stats.map(s => s.late), backgroundColor: '#e03131', borderRadius: 4 },
-        { label: 'Эхлээгүй',      data: stats.map(s => s.nst),  backgroundColor: '#e67700', borderRadius: 4 },
-      ]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { position: 'top', labels: { font: { size: 12 }, boxWidth: 12 } } },
-      scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } }
-    }
-  });
-
-  document.getElementById('deptBody').innerHTML = stats.map(s => `<tr>
-    <td style="font-weight:500">${s.dept}</td>
-    <td style="text-align:right">${s.total}</td>
-    <td style="text-align:right;color:#1971c2">${s.prog}</td>
-    <td style="text-align:right;color:#2f9e44">${s.done}</td>
-    <td style="text-align:right;color:#e03131">${s.late}</td>
-    <td style="text-align:right;color:#e67700">${s.nst}</td>
-    <td style="text-align:right;color:#7048e8">${s.pending}</td>
-    <td style="text-align:right">
-      <div style="display:flex;align-items:center;gap:8px;justify-content:flex-end">
-        <span style="font-weight:500">${s.avg}%</span>
-        <div class="pbar" style="width:80px;display:inline-block">
-          <div class="pfill" style="width:${s.avg}%;background:${s.avg>=70?'#2f9e44':s.avg>=30?'#228be6':'#e03131'}"></div>
-        </div>
-      </div>
-    </td>
-  </tr>`).join('');
-}
-
-// ── ALERTS ─────────────────────────────────────────────────────────────────
-function renderAlerts() {
-  const late = ALL_TASKS.filter(t => t.status === 'late');
-  const nst  = ALL_TASKS.filter(t => t.status === 'not_started');
-  const soon = ALL_TASKS.filter(t => {
-    if (t.status !== 'in_progress' && t.status !== 'pending') return false;
-    const days = (t.finish - TODAY) / 86400000;
-    return days >= 0 && days <= 30;
-  });
-
-  let html = '';
-
-  html += `<div class="sec-title" style="color:var(--red)">⛔ Хоцролттой ажлууд (${late.length})</div>`;
-  if (!late.length) html += `<div class="alert alert-g">Хоцролттой ажил байхгүй байна ✓</div>`;
-  else late.forEach(t => {
-    const days = Math.round((TODAY - t.finish) / 86400000);
-    html += `<div class="alert alert-r"><strong>${t.dept || '—'}</strong> — ${t.name.slice(0,90)} <span style="font-weight:600">(${days} өдөр хоцорсон)</span></div>`;
-  });
-
-  html += `<div class="sec-title" style="color:var(--amber)">⚠️ 30 хоногт дуусах ажлууд (${soon.length})</div>`;
-  if (!soon.length) html += `<div class="alert alert-g">Ойрхон дуусах ажил байхгүй</div>`;
-  else soon.slice(0, 20).forEach(t => {
-    const days = Math.round((t.finish - TODAY) / 86400000);
-    html += `<div class="alert alert-y"><strong>${t.dept || '—'}</strong> — ${t.name.slice(0,90)} — <span style="font-weight:600">${days} өдрийн дараа дуусна</span> (${t.pct}% биелсэн)</div>`;
-  });
-
-  html += `<div class="sec-title" style="color:var(--amber)">📌 Эхлэх ёстой байсан ч эхлээгүй (${nst.length})</div>`;
-  nst.slice(0, 20).forEach(t => {
-    const days = Math.round((TODAY - t.start) / 86400000);
-    html += `<div class="alert alert-y"><strong>${t.dept || '—'}</strong> — ${t.name.slice(0,90)} — <span style="font-weight:600">${fmtDate(t.start)}-аас эхлэх байсан (${days} өдөр болжээ)</span></div>`;
-  });
-  if (nst.length > 20) html += `<div style="font-size:12px;color:var(--text2);padding:8px">... болон бусад ${nst.length-20} ажил</div>`;
-
-  document.getElementById('alerts').innerHTML = html;
-}
-
-// ── TABS ───────────────────────────────────────────────────────────────────
-function showTab(name, btn) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  btn.classList.add('active');
-  document.getElementById(name).classList.add('active');
-  if (name === 'gantt')  renderGantt();
-  if (name === 'dept')   renderDept();
-  if (name === 'alerts') renderAlerts();
-  if (name === 'cost')   renderCost();
-}
-
-const EMBEDDED_DATA = [{"name":"Компанийн бүтцийн схемийн дагуу ажлын байр, албан тушаалын нэршил, орон тоо, судалгаанд суурилсан цалин хөлсний санг боловсруулан батлуулах, сайжруулах","dept":"ЗХН алба","start":"2026-03-18","finish":"2026-04-17","actual_start":"2026-03-18","actual_finish":"","deadline":"2026-03-24","pct":50,"status":"in_progress","duration":"23 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Цалингийн судалгаа хийх, салбарын цалингийн судалгааг худалдан авах, боловсруулалт хийх, цалингийн санал боловсруулах.","dept":"ЗХН алба","start":"2026-05-01","finish":"2026-05-31","actual_start":"2026-05-01","actual_finish":"2026-05-31","deadline":"2026-05-24","pct":100,"status":"done","duration":"22 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Цалингийн судалгаа хийх, салбарын цалингийн судалгааг худалдан авах, боловсруулалт хийх, цалингийн санал боловсруулах.","dept":"ЗХН алба","start":"2026-11-01","finish":"2026-11-30","actual_start":"2026-11-01","actual_finish":"2026-11-30","deadline":"2026-11-23","pct":100,"status":"done","duration":"22 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Хүний нөөцийн хэрэгцээг оновчтой тодорхойлох замаар ажлын байрны тодорхойлолтуудыг нэгтэн, хэлтэс, албадуудад мэргэжил аргазүйн зөвлөмж үзүүлж нийт АБТ батлуулах ажлыг зохион байгуулах.","dept":"ЗХН алба","start":"2026-04-01","finish":"2026-05-31","actual_start":"2026-04-01","actual_finish":"","deadline":"2026-05-24","pct":30,"status":"pending","duration":"44 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Хэлтэс, албадуудаас ажлын байрны тодорхойлолтонд тавигдах шаардлагын дагуу ажлын байрны батлагдсан захиалгын хуудсыг хүлээн авах.","dept":"ЗХН алба","start":"2026-01-01","finish":"2026-12-31","actual_start":"2026-01-01","actual_finish":"","deadline":"2026-12-24","pct":80,"status":"in_progress","duration":"261 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Сонгон шалгаруулалтын боломжит эх үүсвэрт зар байршуулах, постер, эх бэлдэх зэргээр ажил горилогчыг татах.","dept":"ЗХН алба","start":"2026-01-01","finish":"2026-12-31","actual_start":"2026-01-01","actual_finish":"","deadline":"2026-12-24","pct":70,"status":"in_progress","duration":"261 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Их дээд сургуулиуд, Хүний нөөцийн консалтинг компаниудтай хамтран ажиллах гэрээ байгуулах.","dept":"ЗХН алба","start":"2026-07-01","finish":"2026-09-30","actual_start":"2026-07-01","actual_finish":"","deadline":"2026-09-23","pct":9,"status":"pending","duration":"66 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Ажлын байрны өдөрлөг зохион байгуулах /Их дээд сургуулиуд, харьяа дүүргийн хөдөлмөр халамжийн хэлтэс/","dept":"ЗХН алба","start":"2026-04-01","finish":"2026-06-30","actual_start":"","actual_finish":"","deadline":"2026-06-23","pct":0,"status":"pending","duration":"65 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Ажлын байрны өдөрлөг зохион байгуулах /Их дээд сургуулиуд, харьяа дүүргийн хөдөлмөр халамжийн хэлтэс/","dept":"ЗХН алба","start":"2026-10-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"pending","duration":"66 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Ажлын байрын захиалгын хуудсын дагуу анхан шатны сонгон шалгаруулалт хийх боломжит горилогчдыг түүвэрлэх, нөөцийн бүртгэлийг тогтмол хөтлөх","dept":"ЗХН алба","start":"2026-01-01","finish":"2026-12-31","actual_start":"2026-01-01","actual_finish":"2026-12-31","deadline":"2026-12-24","pct":100,"status":"done","duration":"261 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Сонгон шалгаруулалтанд тэнцсэн ажил горилогчид ажлын санал хүргүүлэх, холбогдох мэдээлэл өгөх.","dept":"ЗХН алба","start":"2026-01-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"not_started","duration":"261 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Ажлын санал хүлээн авсан ажилтантай харилцан тохиролцсоны дагуу туршилтын хугацааны хөдөлмөрийн гэрээ бусад дагалдах гэрээ байгуулах, тушаал гарган SMART программд мэдээлэл оруулах.","dept":"ЗХН алба","start":"2026-01-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"not_started","duration":"261 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Шинэ ажилтны чиглүүлэх сургалтанд хамруулах, дасан зохицуулах хөтөлбөрийг хэрэгжүүлэн харьяа хэлтэс албадуудтай хамтран ажиллах.","dept":"ЗХН алба","start":"2026-01-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"not_started","duration":"261 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Туршилтын хугацаа, дагалдан ажиллах хугацаанд ажиллаж буй ажилтнуудыг хугацаа дуусмагц үнэлгээг хэлтэс,албадын удирдлагуудаар үнэлүүлэн үндсэн ажилтнаар томилох ажлыг зохион байгуулах.","dept":"ЗХН алба","start":"2026-01-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"not_started","duration":"261 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Хөдөлмөрийн харилцаа дуусгавар болж буй, цуцлаж буй ажиллагсдын үндэслэл тайлбар, хүсэлийг харьяа хэлтэс,албадын удирдлагуудтай хамтран зөвшилцөх замаар холбоотой бүхий л тушаал шийдвэрийг цаг тухай бүрт гаргах, ажилтанд танилцуулах ажлыг зохион байгуулах","dept":"ЗХН алба","start":"2026-01-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"not_started","duration":"261 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Хөдөлмөрийн харилцаатай холбоотой бусад бүхий л тушаал шийдвэрийг цаг тухай бүрт гарган батлуулах.","dept":"ЗХН алба","start":"2026-01-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"not_started","duration":"261 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Ажилтантай холбоотой өргөдөл, санал, хүсэлт, гомдлыг хүлээн авч, бүртгэх, хугацаанд нь шийдвэрлэх замаар эргэх холбоог бий болгох","dept":"ЗХН алба","start":"2026-01-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"not_started","duration":"261 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Хүний нөөцийн менежментийн тогтолцоог бүрдүүлсэн, хүний нөөцийн зорилтуудын гүйцэтгэлийг тогтмол хянах, тасралтгүй сайжруулсан ХН-н бодлогийн баримт бичгийг боловсруулан батлуулах.","dept":"ЗХН алба","start":"2026-07-01","finish":"2026-07-31","actual_start":"","actual_finish":"","deadline":"2026-07-24","pct":0,"status":"pending","duration":"23 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"ХН-н үйл ажиллагаатай холбоотой холбогдох журмуудыг шинэчлэн сайжруулах, нэмэлтээр боловсруулах, маягтууд сайжруулан, хэвшүүлэх,","dept":"ЗХН алба","start":"2026-08-01","finish":"2026-08-31","actual_start":"","actual_finish":"","deadline":"2026-08-24","pct":0,"status":"pending","duration":"22 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Компанийн үнэ цэнэ, зарчимд нийцсэн соёлыг бий болгох үйл ажиллагааны хөтөлбөр, төсөв боловсруулан батлуулах, шинэчлэх.  /Хөтөлбөрт: олон нийтийн арга хэмжээ, сэдэлжүүлэлт, идэвхижүүлэлтийн календарчилсан төлөвлөгөө багтана./","dept":"ЗХН алба","start":"2026-08-01","finish":"2026-08-31","actual_start":"","actual_finish":"","deadline":"2026-08-24","pct":0,"status":"pending","duration":"22 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Компанийн үнэ цэнэ, зарчимд нийцсэн соёлыг бий болгох үйл ажиллагааны хөтөлбөр, төсөв боловсруулан батлуулах, шинэчлэх.  /Хөтөлбөрт: олон нийтийн арга хэмжээ, сэдэлжүүлэлт, идэвхижүүлэлтийн календарчилсан төлөвлөгөө багтана./","dept":"ЗХН алба","start":"2026-12-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"pending","duration":"23 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Удирдах ажилтнуудад манлайллын хөтөлбөрийг хэрэгжүүлэх, бүтээлч соёлыг төлөвшүүлэх, сургалтанд хамруулах.","dept":"ЗХН алба","start":"2026-05-01","finish":"2026-05-31","actual_start":"","actual_finish":"","deadline":"2026-05-24","pct":0,"status":"pending","duration":"22 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Удирдах ажилтнуудад манлайллын хөтөлбөрийг хэрэгжүүлэх, бүтээлч соёлыг төлөвшүүлэх, сургалтанд хамруулах.","dept":"ЗХН алба","start":"2026-07-01","finish":"2026-07-31","actual_start":"","actual_finish":"","deadline":"2026-07-24","pct":0,"status":"pending","duration":"23 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Ажилтнуудыг тогтвор суурьшилтай ажиллуулах нөхцлийг бүрдүүлэх замаар нийгмийн асуудлыг шийдвэрлэж, эрүүл, сэтгэл ханамжтай хамт олныг бүрдүүлэх.","dept":"ЗХН алба","start":"2026-03-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"not_started","duration":"220 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Хүний нөөцийн бодлоготой уялдуулан гүйцэтгэлийн үнэлгээний систем, цалин хөлс, урамшууллын системийг оновчтой боловсруулан батлуулах.","dept":"ЗХН алба","start":"2026-07-01","finish":"2026-07-31","actual_start":"","actual_finish":"","deadline":"2026-07-24","pct":0,"status":"pending","duration":"23 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Гүйцэтгэлийн үнэлгээний маягт зааварчилгааг сайжруулан ажилчдад танилцуулж, улирал бүр төлөвлөгөө, тайланг авч холбогдох ажилчдад танилцуулан, журамд шаардлагатай нэмэлт өөрчлөлтүүдийг тухай бүр хийх, хэвшүүлэх ажлыг зохион байгуулах.","dept":"ЗХН алба","start":"2026-06-01","finish":"2026-06-30","actual_start":"","actual_finish":"","deadline":"2026-06-23","pct":0,"status":"pending","duration":"22 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Гүйцэтгэлтэй холбоотой санал хүсэлтийг тухай бүр хүлээн авч шийдвэрлэн, ажилтны гүйцэтгэлийг сайжруулан, компанийн зорилгод нийцүүлэх","dept":"ЗХН алба","start":"2026-03-01","finish":"2026-12-31","actual_start":"2026-03-01","actual_finish":"","deadline":"2026-12-24","pct":20,"status":"in_progress","duration":"220 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"360 градусын үнэлгээ хийх, үр дүнг танилцуулах.","dept":"ЗХН алба","start":"2026-06-01","finish":"2026-06-30","actual_start":"","actual_finish":"","deadline":"2026-06-23","pct":0,"status":"pending","duration":"22 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"360 градусын үнэлгээ хийх, үр дүнг танилцуулах.","dept":"ЗХН алба","start":"2026-10-01","finish":"2026-10-31","actual_start":"","actual_finish":"","deadline":"2026-10-24","pct":0,"status":"pending","duration":"23 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Ажилтны карьер хөгжлийн замналыг тодорхой болгох замаар авъяас чадварыг /ур чадвар/ тодорхойлох 9 нүдний үнэлгээний аргыг хэрэглэх, карьерийн төлөвлөгөө боловсруулж батлуулах.","dept":"ЗХН алба","start":"2026-08-01","finish":"2026-08-31","actual_start":"","actual_finish":"","deadline":"2026-08-24","pct":0,"status":"pending","duration":"22 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"9 нүдний үнэлгээний үр дүнд үндэслэн ажил байдал, хувь хүний хөгжлийн төлөвлөгөөг гаргах","dept":"ЗХН алба","start":"2026-09-01","finish":"2026-09-30","actual_start":"","actual_finish":"","deadline":"2026-09-23","pct":0,"status":"pending","duration":"22 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"9 нүдний үнэлгээний үр дүнд үндэслэн ажил байдал, хувь хүний хөгжлийн төлөвлөгөөг гаргах","dept":"ЗХН алба","start":"2026-11-01","finish":"2026-11-30","actual_start":"","actual_finish":"","deadline":"2026-11-23","pct":0,"status":"pending","duration":"22 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Карьер хөгжүүлэлтийн зураглал гарсны дараа холбогдох сургалтыг төлөвлөх, тасралтгүй хөгжүүлэх","dept":"ЗХН алба","start":"2026-03-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"not_started","duration":"220 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Сар бүрийн цаг бүртгэлийг шууд удирдлагуудаар хянуулан, баталгаажуулах","dept":"ЗХН алба","start":"2026-03-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"not_started","duration":"220 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Чөлөө, өвчлөл, таслалт бүртгэлийг тогтмол хийж удирдлагыг мэдээллээр хангах, зохих арга хэмжээг авах.","dept":"ЗХН алба","start":"2026-08-01","finish":"2026-08-31","actual_start":"","actual_finish":"","deadline":"2026-08-24","pct":0,"status":"pending","duration":"22 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Чөлөө, өвчлөл, таслалт бүртгэлийг тогтмол хийж удирдлагыг мэдээллээр хангах, зохих арга хэмжээг авах.","dept":"ЗХН алба","start":"2026-12-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"pending","duration":"23 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Сахилгын арга хэмжээ гарсан тохиолдолд харьяа хэлтэс, албатай хамтран холбогдох арга хэмжээг зохион байгуулах.","dept":"ЗХН алба","start":"2026-06-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"pending","duration":"154 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Сар бүрийн тэмдэглэлт баярын үйл ажиллагааг бусад хэлтэс, албадуудтай хамтран зохион байгуулах. /Төрсөн өдөр, тэмдэглэлт өдөр, цагаан сар,бэсрэг наадам, цасны баяр зохион байгуулах гэх мэт/","dept":"ЗХН алба","start":"2026-04-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"pending","duration":"197 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Ээлжийн амралтын хуваарийг нэгтгэн гарган батлуулах, ээлжийн амралтын цалин, амралтыг олгох нөхцлийг бүрдүүлэх","dept":"ЗХН алба","start":"2026-04-01","finish":"2026-04-30","actual_start":"","actual_finish":"","deadline":"2026-04-23","pct":0,"status":"pending","duration":"22 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"ГОД болон ажилтантай холбоотой бусад даатгалын асуудлаар компанийг төлөөлөх, холбогдох мэдээллийг тогтмол өгөх","dept":"ЗХН алба","start":"2026-12-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"pending","duration":"23 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"ХН-н программ сайжруулалт, ашиглалт, хэрэглээг нэмэгдүүлэх","dept":"ЗХН алба","start":"2026-08-01","finish":"2026-08-31","actual_start":"","actual_finish":"","deadline":"2026-08-24","pct":0,"status":"pending","duration":"22 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"ХН-н программ сайжруулалт, ашиглалт, хэрэглээг нэмэгдүүлэх","dept":"ЗХН алба","start":"2026-11-01","finish":"2026-11-30","actual_start":"","actual_finish":"","deadline":"2026-11-23","pct":0,"status":"pending","duration":"22 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Ажилтнуудыг салбарын шагнал урамшуулалд тодорхойлох, шагналд нэр дэвшүүлэх, дэмжлэг үзүүлэх","dept":"ЗХН алба","start":"2026-10-01","finish":"2026-10-31","actual_start":"","actual_finish":"","deadline":"2026-10-24","pct":0,"status":"pending","duration":"23 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Албаны7 хоногийн ажлын төлөвлөгөө, тайлан нэгтгэн гаргах, тайлагнах.","dept":"ЗХН алба","start":"2026-04-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"pending","duration":"197 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Байгууллагын соёлын хүрээнд сургалтын хөтөлбөр боловсруулах, тайлагнах","dept":"ЗХН алба","start":"2026-07-01","finish":"2026-07-31","actual_start":"","actual_finish":"","deadline":"2026-07-24","pct":0,"status":"pending","duration":"23 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Байгууллагын соёлын хүрээнд сургалтын хөтөлбөр боловсруулах, тайлагнах","dept":"ЗХН алба","start":"2026-11-01","finish":"2026-11-30","actual_start":"","actual_finish":"","deadline":"2026-11-23","pct":0,"status":"pending","duration":"22 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Худалдан авалт хийх журам","dept":"СТ хэлтэс","start":"2026-07-01","finish":"2026-08-31","actual_start":"","actual_finish":"","deadline":"2026-08-24","pct":0,"status":"pending","duration":"44 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Бараа материал орлого авах зарлага хийх журам","dept":"СТ хэлтэс","start":"2026-05-01","finish":"2026-06-30","actual_start":"","actual_finish":"","deadline":"2026-06-23","pct":0,"status":"pending","duration":"43 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Мөнгөн хөрөнгийн журам","dept":"СТ хэлтэс","start":"2026-04-01","finish":"2026-06-30","actual_start":"","actual_finish":"","deadline":"2026-06-23","pct":0,"status":"pending","duration":"65 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Тооллого тооцоо хийх журам шинчлэх","dept":"СТ хэлтэс","start":"2026-04-01","finish":"2026-05-31","actual_start":"","actual_finish":"","deadline":"2026-05-24","pct":0,"status":"pending","duration":"44 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Үндсэн хөрөнгө бүртгэл хөтлөлтийн журам","dept":"СТ хэлтэс","start":"2026-05-01","finish":"2026-06-30","actual_start":"","actual_finish":"","deadline":"2026-06-23","pct":0,"status":"pending","duration":"43 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Бараа материал, үндсэн хөрөнгө кодлох бүртгэх борлуулах үнэ тогтоох журам","dept":"СТ хэлтэс","start":"2026-03-01","finish":"2026-04-30","actual_start":"","actual_finish":"","deadline":"2026-04-23","pct":0,"status":"not_started","duration":"45 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Цалин хөлс тооцох журам","dept":"СТ хэлтэс","start":"2026-07-01","finish":"2026-09-30","actual_start":"","actual_finish":"","deadline":"2026-09-23","pct":0,"status":"pending","duration":"66 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Хөнгөллөлт хангамж аж ахуйн журам","dept":"СТ хэлтэс","start":"2026-04-01","finish":"2026-06-30","actual_start":"","actual_finish":"","deadline":"2026-06-23","pct":0,"status":"pending","duration":"65 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Авлаг, өглөг бүртгэх журам","dept":"СТ хэлтэс","start":"2026-07-01","finish":"2026-08-31","actual_start":"","actual_finish":"","deadline":"2026-08-24","pct":0,"status":"pending","duration":"44 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"СНБББББаримт боловсруулах","dept":"СТ хэлтэс","start":"2026-10-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"pending","duration":"66 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Санхүүгийн программ судлаж шинчлэх","dept":"СТ хэлтэс","start":"2026-04-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"pending","duration":"197 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Санхүүгийн анхан шатны баримт болон бусад тайлагналын загвартай болох","dept":"СТ хэлтэс","start":"2026-04-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"pending","duration":"197 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Санхүүгийн үйл ажиллагаа процесс сайжруулалт хийх","dept":"СТ хэлтэс","start":"2026-04-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"pending","duration":"197 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Компанийн бүртгэл хөтлөлт тайлагнал тодорхой болгох","dept":"СТ хэлтэс","start":"2026-04-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"pending","duration":"197 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Тооллого хийх процесс сайжруулах","dept":"СТ хэлтэс","start":"2026-04-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"pending","duration":"197 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Тооллогын үр дүнгийн урамшуулал","dept":"СТ хэлтэс","start":"2026-03-01","finish":"2026-04-30","actual_start":"","actual_finish":"","deadline":"2026-04-23","pct":0,"status":"not_started","duration":"45 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Техникийн пасспорт болон гарын авлагыг орчуулж алба нэгжүүдийг мэдээллээр хангаж хамтарч ажиллах","dept":"ГХТЛ алба","start":"2026-01-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"not_started","duration":"261 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Импортын барааны борлуулалтын шинжилгээ хийх","dept":"ГХТЛ алба","start":"2026-03-01","finish":"2026-03-31","actual_start":"","actual_finish":"","deadline":"2026-03-24","pct":0,"status":"not_started","duration":"23 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Импортын барааны борлуулалтын шинжилгээ хийх","dept":"ГХТЛ алба","start":"2026-04-01","finish":"2026-06-30","actual_start":"","actual_finish":"","deadline":"2026-06-23","pct":0,"status":"pending","duration":"65 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Импортын барааны борлуулалтын шинжилгээ хийх","dept":"ГХТЛ алба","start":"2026-09-01","finish":"2026-09-30","actual_start":"","actual_finish":"","deadline":"2026-09-23","pct":0,"status":"pending","duration":"22 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Импортын барааны борлуулалтын шинжилгээ хийх","dept":"ГХТЛ алба","start":"2026-12-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"pending","duration":"23 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Чанартай, найдвартай брендийн тоог нэмэх. Албан ёсны борлуулалгч статустай болгох","dept":"ГХТЛ алба","start":"2026-03-01","finish":"2026-03-31","actual_start":"","actual_finish":"","deadline":"2026-03-24","pct":0,"status":"not_started","duration":"23 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Чанартай, найдвартай брендийн тоог нэмэх. Албан ёсны борлуулалгч статустай болгох","dept":"ГХТЛ алба","start":"2026-04-01","finish":"2026-06-30","actual_start":"","actual_finish":"","deadline":"2026-06-23","pct":0,"status":"pending","duration":"65 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Чанартай, найдвартай брендийн тоог нэмэх. Албан ёсны борлуулалгч статустай болгох","dept":"ГХТЛ алба","start":"2026-09-01","finish":"2026-09-30","actual_start":"","actual_finish":"","deadline":"2026-09-23","pct":0,"status":"pending","duration":"22 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Чанартай, найдвартай брендийн тоог нэмэх. Албан ёсны борлуулалгч статустай болгох","dept":"ГХТЛ алба","start":"2026-12-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"pending","duration":"23 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"2026 Озоны тусгай зөвшөөрөл, Озоны үндэстний албанд тайлагнах, квотын хүсэлт гаргах батлуулах","dept":"ГХТЛ алба","start":"2026-01-01","finish":"2026-01-31","actual_start":"","actual_finish":"","deadline":"2026-01-24","pct":0,"status":"late","duration":"23 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Дараагийн үлиралын барааны татан авалтын төлөвлөгөө бэлдэх, тайлагнах","dept":"ГХТЛ алба","start":"2026-03-01","finish":"2026-03-31","actual_start":"","actual_finish":"","deadline":"2026-03-24","pct":0,"status":"not_started","duration":"23 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Дараагийн үлиралын барааны татан авалтын төлөвлөгөө бэлдэх, тайлагнах","dept":"ГХТЛ алба","start":"2026-04-01","finish":"2026-06-30","actual_start":"","actual_finish":"","deadline":"2026-06-23","pct":0,"status":"pending","duration":"65 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Дараагийн үлиралын барааны татан авалтын төлөвлөгөө бэлдэх, тайлагнах","dept":"ГХТЛ алба","start":"2026-09-01","finish":"2026-09-30","actual_start":"","actual_finish":"","deadline":"2026-09-23","pct":0,"status":"pending","duration":"22 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Дараагийн үлиралын барааны татан авалтын төлөвлөгөө бэлдэх, тайлагнах","dept":"ГХТЛ алба","start":"2026-12-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"pending","duration":"23 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Тендерийн захиалгын процессийг цахимжүүлах, баримтжуулах процесс хийх","dept":"ГХТЛ алба","start":"2026-03-01","finish":"2026-05-31","actual_start":"","actual_finish":"","deadline":"2026-05-24","pct":0,"status":"not_started","duration":"67 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Экспортод эхний байдлаар 7 төрлийн барааг гаргах","dept":"ГХТЛ алба","start":"2026-09-01","finish":"2026-10-31","actual_start":"","actual_finish":"","deadline":"2026-10-24","pct":0,"status":"pending","duration":"45 days","cost":16000000,"actual_cost":0,"remaining_cost":16000000,"expected_spent":0},{"name":"Бусад алба нэгжүүдийн захиалгын явцын сайжруулах,","dept":"ГХТЛ алба","start":"2026-03-01","finish":"2026-03-31","actual_start":"","actual_finish":"","deadline":"2026-03-24","pct":0,"status":"not_started","duration":"23 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Бусад алба нэгжүүдийн захиалгын явцын сайжруулах,","dept":"ГХТЛ алба","start":"2026-04-01","finish":"2026-06-30","actual_start":"","actual_finish":"","deadline":"2026-06-23","pct":0,"status":"pending","duration":"65 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Бусад алба нэгжүүдийн захиалгын явцын сайжруулах,","dept":"ГХТЛ алба","start":"2026-09-01","finish":"2026-09-30","actual_start":"","actual_finish":"","deadline":"2026-09-23","pct":0,"status":"pending","duration":"22 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Бусад алба нэгжүүдийн захиалгын явцын сайжруулах,","dept":"ГХТЛ алба","start":"2026-12-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"pending","duration":"23 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Ханган нийлүүлэгчдийн жагсаалтыг сайжруулах","dept":"ГХТЛ алба","start":"2026-03-01","finish":"2026-05-31","actual_start":"","actual_finish":"","deadline":"2026-05-24","pct":0,"status":"not_started","duration":"67 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Үл тохирлыг мэдээллэх хуудас, болон бусад арга сувгуудыг хийж хэрэгжүүлэх.","dept":"ГХТЛ алба","start":"2026-03-01","finish":"2026-04-30","actual_start":"","actual_finish":"","deadline":"2026-04-23","pct":0,"status":"not_started","duration":"45 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Ган савны өдөрлөг /Монголд үйлдвэрлэв.,/","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-04-30","actual_start":"","actual_finish":"","deadline":"2026-04-23","pct":0,"status":"pending","duration":"22 days","cost":15000000,"actual_cost":0,"remaining_cost":15000000,"expected_spent":0},{"name":"Харилцагчдын өдөрлөг /Монголд үйлдвэрлэв.,/","dept":"МБ хэлтэс","start":"2026-09-01","finish":"2026-09-30","actual_start":"","actual_finish":"","deadline":"2026-09-23","pct":0,"status":"pending","duration":"22 days","cost":10000000,"actual_cost":0,"remaining_cost":10000000,"expected_spent":0},{"name":"Шинэ бүтээгдэхүүний идэвхжүүлэлт /Монголд үйлдвэрлэв.,/","dept":"МБ хэлтэс","start":"2026-03-01","finish":"2026-03-31","actual_start":"","actual_finish":"","deadline":"2026-03-24","pct":0,"status":"not_started","duration":"23 days","cost":8000000,"actual_cost":0,"remaining_cost":8000000,"expected_spent":0},{"name":"Шинэ бүтээгдэхүүний идэвхжүүлэлт /Монголд үйлдвэрлэв.,/","dept":"МБ хэлтэс","start":"2026-05-01","finish":"2026-05-31","actual_start":"","actual_finish":"","deadline":"2026-05-24","pct":0,"status":"pending","duration":"22 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Импортын барааны хөгжүүлэлт, шинэ бүтээгдэхүүний судалгаа","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-05-31","actual_start":"","actual_finish":"","deadline":"2026-05-24","pct":0,"status":"pending","duration":"44 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Импортын барааны хөгжүүлэлт, шинэ бүтээгдэхүүний судалгаа","dept":"МБ хэлтэс","start":"2026-07-01","finish":"2026-08-31","actual_start":"","actual_finish":"","deadline":"2026-08-24","pct":0,"status":"pending","duration":"44 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Онлайн вэб сайт","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-05-31","actual_start":"","actual_finish":"","deadline":"2026-05-24","pct":0,"status":"pending","duration":"44 days","cost":30000000,"actual_cost":0,"remaining_cost":30000000,"expected_spent":0},{"name":"Онлайн вэб сайт","dept":"МБ хэлтэс","start":"2026-07-01","finish":"2026-08-31","actual_start":"","actual_finish":"","deadline":"2026-08-24","pct":0,"status":"pending","duration":"44 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Видео контент","dept":"МБ хэлтэс","start":"2026-03-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"not_started","duration":"220 days","cost":10000000,"actual_cost":0,"remaining_cost":10000000,"expected_spent":0},{"name":"1 минутын зөвлөгөө видео","dept":"МБ хэлтэс","start":"2026-03-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"not_started","duration":"220 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Чиглэл ХХК мэргэжлийн үйлчилгээг цогцоор нь үзүүлнэ. 3D каталог, видео контент ашиглах (3D Visualization – бодит мэт харагдац)","dept":"МБ хэлтэс","start":"2026-05-01","finish":"2026-05-31","actual_start":"","actual_finish":"","deadline":"2026-05-24","pct":0,"status":"pending","duration":"22 days","cost":6000000,"actual_cost":0,"remaining_cost":6000000,"expected_spent":0},{"name":"Чиглэл ХХК мэргэжлийн үйлчилгээг цогцоор нь үзүүлнэ. 3D каталог, видео контент ашиглах (3D Visualization – бодит мэт харагдац)","dept":"МБ хэлтэс","start":"2026-08-01","finish":"2026-08-31","actual_start":"","actual_finish":"","deadline":"2026-08-24","pct":0,"status":"pending","duration":"22 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Дижитал маркетингийн трендийг байгууллагын онцлогтой уялдуулах","dept":"МБ хэлтэс","start":"2026-05-01","finish":"2026-05-31","actual_start":"","actual_finish":"","deadline":"2026-05-24","pct":0,"status":"pending","duration":"22 days","cost":4000000,"actual_cost":0,"remaining_cost":4000000,"expected_spent":0},{"name":"Бүх барааны QR заавар бичлэг","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-05-31","actual_start":"","actual_finish":"","deadline":"2026-05-24","pct":0,"status":"pending","duration":"44 days","cost":3000000,"actual_cost":0,"remaining_cost":3000000,"expected_spent":0},{"name":"B2B зорилтот маркетинг","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-05-31","actual_start":"","actual_finish":"","deadline":"2026-05-24","pct":0,"status":"pending","duration":"44 days","cost":5000000,"actual_cost":0,"remaining_cost":5000000,"expected_spent":0},{"name":"Монголд үйлдвэрлэв Улирал бүр аян","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-04-30","actual_start":"","actual_finish":"","deadline":"2026-04-23","pct":0,"status":"pending","duration":"22 days","cost":1000000,"actual_cost":0,"remaining_cost":1000000,"expected_spent":0},{"name":"Бүтээгдэхүүний танилцуулга видео","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-05-31","actual_start":"","actual_finish":"","deadline":"2026-05-24","pct":0,"status":"pending","duration":"44 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Монгол хүний ур ухаан шингээж бүтээсэн гал тогооны тоног төхөөрөмж хөгжүүлэх Чиглэлийн бүтээгдэхүүн Амтат хоол","dept":"МБ хэлтэс","start":"2026-05-01","finish":"2026-05-31","actual_start":"","actual_finish":"","deadline":"2026-05-24","pct":0,"status":"pending","duration":"22 days","cost":15000000,"actual_cost":0,"remaining_cost":15000000,"expected_spent":0},{"name":"Хэмнэлт + Эрүүл мэнд + Хялбар хэрэглээ","dept":"МБ хэлтэс","start":"2026-03-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"not_started","duration":"220 days","cost":4000000,"actual_cost":0,"remaining_cost":4000000,"expected_spent":0},{"name":"Бүтээгдэхүүний катологи","dept":"МБ хэлтэс","start":"2026-05-01","finish":"2026-05-31","actual_start":"","actual_finish":"","deadline":"2026-05-24","pct":0,"status":"pending","duration":"22 days","cost":4000000,"actual_cost":0,"remaining_cost":4000000,"expected_spent":0},{"name":"Хэвлэл","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-04-30","actual_start":"","actual_finish":"","deadline":"2026-04-23","pct":0,"status":"pending","duration":"22 days","cost":6000000,"actual_cost":0,"remaining_cost":6000000,"expected_spent":0},{"name":"Чиглэл брэнд реклам","dept":"МБ хэлтэс","start":"2026-09-01","finish":"2026-09-03","actual_start":"","actual_finish":"","deadline":"2026-08-27","pct":0,"status":"pending","duration":"3 days","cost":15000000,"actual_cost":0,"remaining_cost":15000000,"expected_spent":0},{"name":"Улиралын чанартай бүтээгдэхүүн хөгжүүлэлт, идэвхжүүлэлт","dept":"МБ хэлтэс","start":"2026-03-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"not_started","duration":"220 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Байгууллагын брэнд бүүк хөгжүүлэлт","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-05-31","actual_start":"","actual_finish":"","deadline":"2026-05-24","pct":0,"status":"pending","duration":"44 days","cost":2000000,"actual_cost":0,"remaining_cost":2000000,"expected_spent":0},{"name":"Брошур хэвлэл","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-04-30","actual_start":"","actual_finish":"","deadline":"2026-04-23","pct":0,"status":"pending","duration":"22 days","cost":6000000,"actual_cost":0,"remaining_cost":6000000,"expected_spent":0},{"name":"Олны танил инфлүсер","dept":"МБ хэлтэс","start":"2026-03-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"not_started","duration":"220 days","cost":30000000,"actual_cost":0,"remaining_cost":30000000,"expected_spent":0},{"name":"Брэндийн танигдалт","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-09-30","actual_start":"","actual_finish":"","deadline":"2026-09-23","pct":0,"status":"pending","duration":"131 days","cost":10000000,"actual_cost":0,"remaining_cost":10000000,"expected_spent":0},{"name":"Таны мэдлэгт / Хамтдаа суралцъя / Сургалт, зөвлөх үйлчилгээ нэвтрүүлэх (Training & Consulting – мэдлэгт суурилсан үйлчилгээ)","dept":"МБ хэлтэс","start":"2026-05-01","finish":"2026-05-31","actual_start":"","actual_finish":"","deadline":"2026-05-24","pct":0,"status":"pending","duration":"22 days","cost":3000000,"actual_cost":0,"remaining_cost":3000000,"expected_spent":0},{"name":"Таны мэдлэгт / Хамтдаа суралцъя / Сургалт, зөвлөх үйлчилгээ нэвтрүүлэх (Training & Consulting – мэдлэгт суурилсан үйлчилгээ)","dept":"МБ хэлтэс","start":"2026-09-01","finish":"2026-09-30","actual_start":"","actual_finish":"","deadline":"2026-09-23","pct":0,"status":"pending","duration":"22 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Сар бүр өдөр бүрийн улирал бүрийн онцлох","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-04-30","actual_start":"","actual_finish":"","deadline":"2026-04-23","pct":0,"status":"pending","duration":"22 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Сар бүр өдөр бүрийн улирал бүрийн онцлох","dept":"МБ хэлтэс","start":"2026-06-01","finish":"2026-07-31","actual_start":"","actual_finish":"","deadline":"2026-07-24","pct":0,"status":"pending","duration":"45 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Сар бүр өдөр бүрийн улирал бүрийн онцлох","dept":"МБ хэлтэс","start":"2026-09-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"pending","duration":"88 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Дата базз","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-04-30","actual_start":"","actual_finish":"","deadline":"2026-04-23","pct":0,"status":"pending","duration":"22 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Дата базз","dept":"МБ хэлтэс","start":"2026-06-01","finish":"2026-07-31","actual_start":"","actual_finish":"","deadline":"2026-07-24","pct":0,"status":"pending","duration":"45 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Дата базз","dept":"МБ хэлтэс","start":"2026-09-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"pending","duration":"88 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Мэргэжлийн байгууллагын хамтын зөвлөгөө","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-04-30","actual_start":"","actual_finish":"","deadline":"2026-04-23","pct":0,"status":"pending","duration":"22 days","cost":3000000,"actual_cost":0,"remaining_cost":3000000,"expected_spent":0},{"name":"Мэргэжлийн байгууллагын хамтын зөвлөгөө","dept":"МБ хэлтэс","start":"2026-07-01","finish":"2026-07-31","actual_start":"","actual_finish":"","deadline":"2026-07-24","pct":0,"status":"pending","duration":"23 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Мэргэжлийн байгууллагын хамтын зөвлөгөө","dept":"МБ хэлтэс","start":"2026-09-01","finish":"2026-09-30","actual_start":"","actual_finish":"","deadline":"2026-09-23","pct":0,"status":"pending","duration":"22 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Мэргэжлийн байгууллагын хамтын зөвлөгөө","dept":"МБ хэлтэс","start":"2026-11-01","finish":"2026-11-30","actual_start":"","actual_finish":"","deadline":"2026-11-23","pct":0,"status":"pending","duration":"22 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Сошиал суваг идэвхжүүлэлт","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-04-30","actual_start":"","actual_finish":"","deadline":"2026-04-23","pct":0,"status":"pending","duration":"22 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Сошиал суваг идэвхжүүлэлт","dept":"МБ хэлтэс","start":"2026-06-01","finish":"2026-07-31","actual_start":"","actual_finish":"","deadline":"2026-07-24","pct":0,"status":"pending","duration":"45 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Сошиал суваг идэвхжүүлэлт","dept":"МБ хэлтэс","start":"2026-09-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"pending","duration":"88 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Эзэгтэйн гал тогоо","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-04-30","actual_start":"","actual_finish":"","deadline":"2026-04-23","pct":0,"status":"pending","duration":"22 days","cost":5000000,"actual_cost":0,"remaining_cost":5000000,"expected_spent":0},{"name":"Эзэгтэйн гал тогоо","dept":"МБ хэлтэс","start":"2026-06-01","finish":"2026-07-31","actual_start":"","actual_finish":"","deadline":"2026-07-24","pct":0,"status":"pending","duration":"45 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Эзэгтэйн гал тогоо","dept":"МБ хэлтэс","start":"2026-09-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"pending","duration":"88 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Хэрэглэгчийн урамшууллын систем","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-04-30","actual_start":"","actual_finish":"","deadline":"2026-04-23","pct":0,"status":"pending","duration":"22 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Хэрэглэгчийн урамшууллын систем","dept":"МБ хэлтэс","start":"2026-06-01","finish":"2026-06-30","actual_start":"","actual_finish":"","deadline":"2026-06-23","pct":0,"status":"pending","duration":"22 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Агуулах чөлөөлөх худалдаа","dept":"МБ хэлтэс","start":"2026-05-01","finish":"2026-05-31","actual_start":"","actual_finish":"","deadline":"2026-05-24","pct":0,"status":"pending","duration":"22 days","cost":6000000,"actual_cost":0,"remaining_cost":6000000,"expected_spent":0},{"name":"Агуулах чөлөөлөх худалдаа","dept":"МБ хэлтэс","start":"2026-08-01","finish":"2026-08-31","actual_start":"","actual_finish":"","deadline":"2026-08-24","pct":0,"status":"pending","duration":"22 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Жишиг гал тогоог нэг салбар дэлгүүр дээр хийх","dept":"МБ хэлтэс","start":"2026-05-01","finish":"2026-05-31","actual_start":"","actual_finish":"","deadline":"2026-05-24","pct":0,"status":"pending","duration":"22 days","cost":50000000,"actual_cost":0,"remaining_cost":50000000,"expected_spent":0},{"name":"Үзэсгэлэн худалдаа","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-04-30","actual_start":"","actual_finish":"","deadline":"2026-04-23","pct":0,"status":"pending","duration":"22 days","cost":15000000,"actual_cost":0,"remaining_cost":15000000,"expected_spent":0},{"name":"Үзэсгэлэн худалдаа","dept":"МБ хэлтэс","start":"2026-06-01","finish":"2026-06-30","actual_start":"","actual_finish":"","deadline":"2026-06-23","pct":0,"status":"pending","duration":"22 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Үзэсгэлэн худалдаа","dept":"МБ хэлтэс","start":"2026-09-01","finish":"2026-09-30","actual_start":"","actual_finish":"","deadline":"2026-09-23","pct":0,"status":"pending","duration":"22 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Салбар дэлгүүрийн өөрчлөлт","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-04-30","actual_start":"","actual_finish":"","deadline":"2026-04-23","pct":0,"status":"pending","duration":"22 days","cost":5000000,"actual_cost":0,"remaining_cost":5000000,"expected_spent":0},{"name":"Харилцагчийн сэтгэл ханамжийг нэмэгдүүлэх","dept":"МБ хэлтэс","start":"2026-03-18","finish":"2026-03-18","actual_start":"","actual_finish":"","deadline":"","pct":0,"status":"late","duration":"1 day","cost":2000000,"actual_cost":0,"remaining_cost":2000000,"expected_spent":0},{"name":"Харилцагч төвтэй маркетинг","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-05-31","actual_start":"","actual_finish":"","deadline":"2026-05-24","pct":0,"status":"pending","duration":"44 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Сургалт хөгжил /Дотоод/","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-04-30","actual_start":"","actual_finish":"","deadline":"2026-04-23","pct":0,"status":"pending","duration":"22 days","cost":1000000,"actual_cost":0,"remaining_cost":1000000,"expected_spent":0},{"name":"Сургалт хөгжил /Дотоод/","dept":"МБ хэлтэс","start":"2026-07-01","finish":"2026-07-31","actual_start":"","actual_finish":"","deadline":"2026-07-24","pct":0,"status":"pending","duration":"23 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Mass TV","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-04-30","actual_start":"","actual_finish":"","deadline":"2026-04-23","pct":0,"status":"pending","duration":"22 days","cost":8640000,"actual_cost":0,"remaining_cost":8640000,"expected_spent":0},{"name":"Mass TV","dept":"МБ хэлтэс","start":"2026-09-01","finish":"2026-09-30","actual_start":"","actual_finish":"","deadline":"2026-09-23","pct":0,"status":"pending","duration":"22 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Чиглэл пэйж хуудас хөгжүүлэх","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"pending","duration":"197 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Онлайн бүүст","dept":"МБ хэлтэс","start":"2026-01-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"not_started","duration":"261 days","cost":51840000,"actual_cost":0,"remaining_cost":51840000,"expected_spent":0},{"name":"76115333 колл про сайжруулах","dept":"МБ хэлтэс","start":"2026-01-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"not_started","duration":"261 days","cost":5886000,"actual_cost":0,"remaining_cost":5886000,"expected_spent":0},{"name":"Чат бот автомат мсж","dept":"МБ хэлтэс","start":"2026-01-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"not_started","duration":"261 days","cost":2500000,"actual_cost":0,"remaining_cost":2500000,"expected_spent":0},{"name":"Хиймэл оюун ухаан","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-04-30","actual_start":"","actual_finish":"","deadline":"2026-04-23","pct":0,"status":"pending","duration":"22 days","cost":4284000,"actual_cost":0,"remaining_cost":4284000,"expected_spent":0},{"name":"Дизайны загварын сайт төлбөр","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-04-30","actual_start":"","actual_finish":"","deadline":"2026-04-23","pct":0,"status":"pending","duration":"22 days","cost":185000,"actual_cost":0,"remaining_cost":185000,"expected_spent":0},{"name":"Дижитал QR лиценз төлбөр","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-04-30","actual_start":"","actual_finish":"","deadline":"2026-04-23","pct":0,"status":"pending","duration":"22 days","cost":333000,"actual_cost":0,"remaining_cost":333000,"expected_spent":0},{"name":"Барааны зэрэглэл : Зөвхөн онлайнаар зарах барааны бүлэг болон SKU-сонгох","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"pending","duration":"197 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Суваг: chiglel.mn","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"pending","duration":"197 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Сануулах маркетинг: Сошиал медиа маркетинг [post, story, reel]","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"pending","duration":"197 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Талбарын маркетинг: Вебсайт постер, онлайн группүүдтэй хамтын ажиллагаа","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"pending","duration":"197 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Талбарын маркетинг: Онлайн эвентүүдэд оролцох","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"pending","duration":"197 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Үнийн бодлого: Онлайн дэлгүүрүүдийн хураамж, шимтгэл болон тээврийн зардлыг тооцсон үнийн бодлого баримтлах","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"pending","duration":"197 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Сануулах маркетинг: Сошиал медиа маркетинг [post, story, reel]","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"pending","duration":"197 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Лояалти хөтөлбөр: Онлайн худалдан авалтаар оноо цуглуулах","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"pending","duration":"197 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Мэргэшсэн ажилтан: Онлайн дэлгүүр хариуцсан мэргэшсэн ажилтантай болон ажиллах","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"pending","duration":"197 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Онлайн худалдааны гомдол гаргалт буцаалтын журам гаргаж мөрдүүлэн ажиллана","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"pending","duration":"197 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Барааны зэрэглэл : A-%, B-%, C-%, D -% хувийг салбар бүрийн борлуулалтын гүйцтэгэлийн дагуу дүгнэлт хийн гаргаж тус салбар цэгийн онцлог давуу талаар ялгаран ажиллах чиглүүлэг гаргах","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"pending","duration":"197 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Дундаж билл-н дүн нэмэгдүүлэх хавсрах барааны сонголт нэмэгдүүлэх [дагалдах бараа, орлох бараа]","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"pending","duration":"197 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Дэлгүүрийн Заавал байх аюулгүй нөөцийн тооцоолол хийж хэрэгжүүлсэн байна.","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"pending","duration":"197 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Талбарын маркетинг: Баяр ёслолын үеийн Vйлчилгээний маркетинг хангуулах","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"pending","duration":"197 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Талбарын маркетинг: Мэргэшсэн зөвлөх үйлчилгээг нэвтрүүлэх","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"pending","duration":"197 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Талбарын маркетинг: каталоги танилцуулга байршуулах, үнийн байршуулалт","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"pending","duration":"197 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Сануулах маркетинг: Сошиал медиа маркетинг [post, story, reel]","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"pending","duration":"197 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Худалдааны төрөл: хямдралтай, бэлгийн багцтай, баяр ёслолын үеийн","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"pending","duration":"197 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Худалдааны төрөл: шинэ загвар, төрөл дээр онлайнаар урьдчилсан захиалга авах","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"pending","duration":"197 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Лояалти хөтөлбөр: Лояалти хөтөлбөр гарган, салбар дэлгүүрийн идэвхжүүлэлтийн үйл ажиллагааг тогтмол хийх","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"pending","duration":"197 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Өрөлтийн стандарт: Дэлгүүрийн өрөлтийн стандартын гарын авлагатай болж хэвшүүлнэ","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"pending","duration":"197 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Дэлгүүрийн тохижилт: Үйлчлүүлэгчийн тав тухтай байдлыг хангах орчинтой [гэрэлтүүлэг, үнэр, цэвэрлэгээ] болгож, чеклистээр шалгаж хэвшинэ","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"pending","duration":"197 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Сургалт: Худалдааны ажилтнуудад Үйчилгээний стандарт, брэндингийн сургалт, барааны шинж чанарын [хэрэглээ, өмсгөл, арьс үсний шинж чанар, барааны ашиглах заавар гэх мэт] давтамжтайгаар танхимийн болон мониторинг сургалт явуулна. Эдгээр төрөл бүрийн сургал","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"pending","duration":"197 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Эрсдлээс урьдчилан сэргийлэх: 1.Хуваарьт болон гэнэтийн тооллогыг хийх, 2. Төлбөр тооцооны хэрэгслүүдийг байршуулах, 3. Камерийн хяналт","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"pending","duration":"197 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Ажилтан тус бүрийн АБТ-ыг гарган баталгаажуулах","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"pending","duration":"197 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Дотоод дурэм журам, баримт бичгийн бүрдүүлэлтийг журамлан гаргах","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"pending","duration":"197 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Ажилтан бүрийн цалингийн нууцлал","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"pending","duration":"197 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Борлуулалттай уялдаатай цалин хөлсний систем","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"pending","duration":"197 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Хяналт үнэлгээ: Худалдааны KPI үнэлгээгээр үнэлэх","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"pending","duration":"197 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Хувцаслалтын стандарт,","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"pending","duration":"197 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Сургалт: Худалдааны ажилтнуудад Үйчилгээний стандарт, брэндингийн сургалт, барааны шинж чанарын [хэрэглээ, өмсгөл, арьс үсний шинж чанар, барааны ашиглах заавар гэх мэт] давтамжтайгаар танхимийн болон менторинг сургалт явуулна. Эдгээр төрөл бүрийн сургалт","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"pending","duration":"197 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Гадаад өнгө төрх: Хаягжилт шинэчлэлт, хаалга цонх цэвэрлэгээ стикер наалт солих, шат довжооны аюулгүй байдал","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"pending","duration":"197 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Дотоод өнгө төрх: Салбар тус бүрийн урсгал засвар, лангуу тавиурын шинэчлэлт, өрөлтийн даацыг нэмэгдүүлэх","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"pending","duration":"197 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Аж ахуйн алба хоорондын хамтын ажиллагаа","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"pending","duration":"197 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Салбарын ажилтнуудын ажиллах орчинг сайжруулах","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"pending","duration":"197 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Эскортод гаргах бүтээгдэхүүний судалгаа оюуны өмч борлуулалт сав баглаа боодол сурталчилгаа хэвлэл Экспортод гаргах барааны сав баглаа боодлын загвар гаргах","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-04-30","actual_start":"","actual_finish":"","deadline":"2026-04-23","pct":0,"status":"pending","duration":"22 days","cost":4000000,"actual_cost":0,"remaining_cost":4000000,"expected_spent":0},{"name":"Экспортод гаргах бараагаар ОХУ-ын Москва хотод болох үзэсгэлэнд оролцох, бараа бүтээгдэхүүнийг нэвтрүүлэх","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-05-31","actual_start":"","actual_finish":"","deadline":"2026-05-24","pct":0,"status":"pending","duration":"44 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Улирал сар бүрээр хөтөлбөр гарган батлуулан ажиллах","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-05-31","actual_start":"","actual_finish":"","deadline":"2026-05-24","pct":0,"status":"pending","duration":"44 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Борлуулалтын суваг дээр өөрийн нэрийн брэндийн жижиг хэрэгслийг харилцагчийн нэрийн дэлгүүр цэгээр худалдаалах гэх мэт","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-05-31","actual_start":"","actual_finish":"","deadline":"2026-05-24","pct":0,"status":"pending","duration":"44 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Орон нутагт чиглэсэн тусгай төсөл боловсруулан ажиллах","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-04-30","actual_start":"","actual_finish":"","deadline":"2026-04-23","pct":0,"status":"pending","duration":"22 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Орон нутагт чиглэсэн тусгай төсөл боловсруулан ажиллах","dept":"МБ хэлтэс","start":"2026-07-01","finish":"2026-07-31","actual_start":"","actual_finish":"","deadline":"2026-07-24","pct":0,"status":"pending","duration":"23 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Эхний ээлжинд овор багатай барааг нэрийн дэлгүүрт байршуулах","dept":"МБ хэлтэс","start":"2026-05-01","finish":"2026-05-31","actual_start":"","actual_finish":"","deadline":"2026-05-24","pct":0,"status":"pending","duration":"22 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Үлдэгдэл ихтэй зарагдахгүй байгаа бараан дээр судалгаа хийж, идэвхижүүлэлт, сурталчилгаа, үнийн хямдрал, урамшуулал зэргээр борлуулалтын нэмэгдүүлэх","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-04-30","actual_start":"","actual_finish":"","deadline":"2026-04-23","pct":0,"status":"pending","duration":"22 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Хорика салбарын ААНбайгууллага, хувь хэрэглэгчийн дата бүрдүүлэх,","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-04-30","actual_start":"","actual_finish":"","deadline":"2026-04-23","pct":0,"status":"pending","duration":"22 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Хорика салбарын ААНбайгууллага, хувь хэрэглэгчийн дата бүрдүүлэх,","dept":"МБ хэлтэс","start":"2026-06-01","finish":"2026-07-31","actual_start":"","actual_finish":"","deadline":"2026-07-24","pct":0,"status":"pending","duration":"45 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Хорика салбарын ААНбайгууллага, хувь хэрэглэгчийн дата бүрдүүлэх,","dept":"МБ хэлтэс","start":"2026-09-01","finish":"2026-12-31","actual_start":"","actual_finish":"","deadline":"2026-12-24","pct":0,"status":"pending","duration":"88 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Сануулах маркетинг: Сошиал медиа маркетинг [post, story, reel]","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-04-30","actual_start":"","actual_finish":"","deadline":"2026-04-23","pct":0,"status":"pending","duration":"22 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Сануулах маркетинг: Утсан харилцаа","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-04-30","actual_start":"","actual_finish":"","deadline":"2026-04-23","pct":0,"status":"pending","duration":"22 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Сануулах маркетинг: Имэйл маркетинг","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-04-30","actual_start":"","actual_finish":"","deadline":"2026-04-23","pct":0,"status":"pending","duration":"22 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Биечилсэн худалдаа, ятган үнэмшүүлэлт","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-04-30","actual_start":"","actual_finish":"","deadline":"2026-04-23","pct":0,"status":"pending","duration":"22 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Үнийн бодлого: Урамшууллын систем нэвтрүүлэх","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-04-30","actual_start":"","actual_finish":"","deadline":"2026-04-23","pct":0,"status":"pending","duration":"22 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Баяр ёслолын үеэрх бэлгийн үйл ажиллагаа хийх [Урьдчилсан дата цуглуулалт, саналыг тухайн баяр ёслолоос 2 сарын өмнө явуулах]","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-04-30","actual_start":"","actual_finish":"","deadline":"2026-04-23","pct":0,"status":"pending","duration":"22 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Шууд борлуулалтыг нэмэгдүүлэх. Гал тогооны чиглэлийг тодорхойлсон хоол үйлдвэрлэл чиглэлээс хамаарсан үнийн саналын багцтай санал болгох - Багцын хямдрал судалгаатай хийх","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-04-30","actual_start":"","actual_finish":"","deadline":"2026-04-23","pct":0,"status":"pending","duration":"22 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Захиалга авах цэгийн тохижилт, ажиллах орчинг сайжруулах","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-05-31","actual_start":"","actual_finish":"","deadline":"2026-05-24","pct":0,"status":"pending","duration":"44 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Үйлдвэрийн захиалгат бараа хүлээн авах цэгийн үйл ажиллагааг сайжруулах. Хэрэглэгчийн датаг Маркетингийн албатай уялдуулах","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-05-31","actual_start":"","actual_finish":"","deadline":"2026-05-24","pct":0,"status":"pending","duration":"44 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Түгээлтийн системийг боловсронгуй болгох, үл тохиролыг бууруулах","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-04-30","actual_start":"","actual_finish":"","deadline":"2026-04-23","pct":0,"status":"pending","duration":"22 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Ажилтны ёс зүйн хэм хэмжээ, өдөр тутмын үндсэн болон нэмэлтээр хийгдэх ажлын хяналт,","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-04-30","actual_start":"","actual_finish":"","deadline":"2026-04-23","pct":0,"status":"pending","duration":"22 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Түгээлтийн процессыг хэрэглэгчрүү чиглэсэн байдлаар хийх боловч дотоод ажилтанд дарамт багатайгаар шийдвэрлэх","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-04-30","actual_start":"","actual_finish":"","deadline":"2026-04-23","pct":0,"status":"pending","duration":"22 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"KPI үнэлгээний хуудсыг борлуулалттай холбоотой, эхний 3 сарын цалингийн явган яриаг салбар дэлгүүр дээр ам дамжсан яриаг таслан зогсоох","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-04-30","actual_start":"","actual_finish":"","deadline":"2026-04-23","pct":0,"status":"pending","duration":"22 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Шинэ хувцас хангамж, Салбарын ажилтан, Салбар хариуцсан менежер","dept":"МБ хэлтэс","start":"2026-04-01","finish":"2026-04-30","actual_start":"","actual_finish":"","deadline":"2026-04-23","pct":0,"status":"pending","duration":"22 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Одоогийн засвар үйлчилгээг илүү системтэй болгож, 6 сар / 1 жилийн гэрээт үзлэг, тогтмол шалгалт, элэгдэлтэй сэлбэгийг урьдчилан солих үйлчилгээг санал болгоно. Сургууль цэцэрлэг төрийн худалдан авалт биш худалдан авалт хийсэн бүх газруудыг судлах","dept":"МБ хэлтэс","start":"2026-05-01","finish":"2026-05-31","actual_start":"","actual_finish":"","deadline":"2026-05-24","pct":0,"status":"pending","duration":"22 days","cost":4000000,"actual_cost":0,"remaining_cost":4000000,"expected_spent":0},{"name":"Одоогийн засвар үйлчилгээг илүү системтэй болгож, 6 сар / 1 жилийн гэрээт үзлэг, тогтмол шалгалт, элэгдэлтэй сэлбэгийг урьдчилан солих үйлчилгээг санал болгоно. Сургууль цэцэрлэг төрийн худалдан авалт биш худалдан авалт хийсэн бүх газруудыг судлах","dept":"МБ хэлтэс","start":"2026-09-01","finish":"2026-09-30","actual_start":"","actual_finish":"","deadline":"2026-09-23","pct":0,"status":"pending","duration":"22 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Засвар үйлчилгээний албаны танигдалт мэргэжлийн борлуулалтын дараах үйлчилгээг нэвтрүүлэх Засварын үйлчилгээний ажилчдын сургалт хөгжил чадавхжуулалт дээр анхаарах","dept":"МБ хэлтэс","start":"2026-05-01","finish":"2026-05-31","actual_start":"","actual_finish":"","deadline":"2026-05-24","pct":0,"status":"pending","duration":"22 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Засвар үйлчилгээний албаны танигдалт мэргэжлийн борлуулалтын дараах үйлчилгээг нэвтрүүлэх Засварын үйлчилгээний ажилчдын сургалт хөгжил чадавхжуулалт дээр анхаарах","dept":"МБ хэлтэс","start":"2026-09-01","finish":"2026-09-30","actual_start":"","actual_finish":"","deadline":"2026-09-23","pct":0,"status":"pending","duration":"22 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Сервис үйлчилгээг нэвтрүүлсэн байгууллагын үйл ажиллагааны процессыг судлах","dept":"МБ хэлтэс","start":"2026-05-01","finish":"2026-05-31","actual_start":"","actual_finish":"","deadline":"2026-05-24","pct":0,"status":"pending","duration":"22 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Сервис үйлчилгээг нэвтрүүлсэн байгууллагын үйл ажиллагааны процессыг судлах","dept":"МБ хэлтэс","start":"2026-09-01","finish":"2026-09-30","actual_start":"","actual_finish":"","deadline":"2026-09-23","pct":0,"status":"pending","duration":"22 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Сайн ажилтан бэлтгэх, тогтоон барих,","dept":"МБ хэлтэс","start":"2026-05-01","finish":"2026-05-31","actual_start":"","actual_finish":"","deadline":"2026-05-24","pct":0,"status":"pending","duration":"22 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Гадна пассад, цонхны амалгаа, цилкон шахах, чигжээс хийх, D9:D321 давхарын нүүрэн хэсэгт хөөсөн дулаалга хийх","dept":"ААХ алба","start":"2026-03-01","finish":"2026-04-30","actual_start":"","actual_finish":"","deadline":"2026-04-23","pct":0,"status":"not_started","duration":"45 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Гадна үүдэнд том хаалга суурьлуулах","dept":"ААХ алба","start":"2026-03-01","finish":"2026-03-31","actual_start":"","actual_finish":"","deadline":"2026-03-24","pct":0,"status":"not_started","duration":"23 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Гадна лифтний зураг гаргах, лифтний захиалга өгөх, суурь цуцгах, металь рам босгох, иргэний болон галын шат хийх, материалын худалдан авалт хйих","dept":"ААХ алба","start":"2026-04-01","finish":"2026-11-30","actual_start":"","actual_finish":"","deadline":"2026-11-23","pct":0,"status":"pending","duration":"174 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Дотор лифтний суурийн цуцгалт, матель рамын гүйцэтгэлийг хийж дуусгах, лифт угсрах, 1-7 давхарын лифтний хананы өрлөг хийх, техникийн давхарыг бүрэн гүйцэтгэж дуусгах. материалын худалдан авалт","dept":"ААХ алба","start":"2026-04-01","finish":"2026-11-30","actual_start":"","actual_finish":"","deadline":"2026-11-23","pct":0,"status":"pending","duration":"174 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"6,7 давхарын шал плита хийх, гарниз, бэлэнтүүс хийх материал худалдан авалт хийх","dept":"ААХ алба","start":"2026-04-01","finish":"2026-11-30","actual_start":"","actual_finish":"","deadline":"2026-11-23","pct":0,"status":"pending","duration":"174 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Шатны дотор бариул, гадна хашлага хамгаалат хийх, 1-6 давхарын шатны чулууг хийж гүйцээх, 1-5 давхарын мазакан шал хийх, материалын худалдан авалт хийх","dept":"ААХ алба","start":"2026-04-01","finish":"2026-11-30","actual_start":"","actual_finish":"","deadline":"2026-11-23","pct":0,"status":"pending","duration":"174 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"6,7 давхарын металь баганыг өнгөт хавтангаар бүрэх материал худалдан авалт хийх","dept":"ААХ алба","start":"2026-04-01","finish":"2026-11-30","actual_start":"","actual_finish":"","deadline":"2026-11-23","pct":0,"status":"pending","duration":"174 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"6,7 давхарын таазны дуулага хийх, дүүжин тааз хийж, ус чийгний тусгааралт хийх материал худалдан авалт хийх","dept":"ААХ алба","start":"2026-04-01","finish":"2026-11-30","actual_start":"","actual_finish":"","deadline":"2026-11-23","pct":0,"status":"pending","duration":"174 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"6,_7 давхарын гадна дээврийн ус тусгаарлагч будаг хийх материал худалдан авалт хийх","dept":"ААХ алба","start":"2026-04-01","finish":"2026-11-30","actual_start":"","actual_finish":"","deadline":"2026-11-23","pct":0,"status":"pending","duration":"174 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"6,7 давхарын ажилчдын цайны газар, оффис, хурлын заалны зориулалтаар засал чимэглэл хийгдэнэ. материал худалдан авалт","dept":"ААХ алба","start":"2026-04-01","finish":"2026-11-30","actual_start":"","actual_finish":"","deadline":"2026-11-23","pct":0,"status":"pending","duration":"174 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"6 давхарт нийтийн ариун цэврийн өрөөний дотор засал болон плита, угаалтуур, суултуур, толь суурьлуулах засал чимэглэл хийгдэнэ. материал худалдан авалт хийх","dept":"ААХ алба","start":"2026-04-01","finish":"2026-11-30","actual_start":"","actual_finish":"","deadline":"2026-11-23","pct":0,"status":"pending","duration":"174 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Давхар бүрт ажилчдын ариун цэврийн өрөө, душ гаргах ажил хийгдэнэ. материал худалдан авалт хийх","dept":"ААХ алба","start":"2026-04-01","finish":"2026-11-30","actual_start":"","actual_finish":"","deadline":"2026-11-23","pct":0,"status":"pending","duration":"174 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"4 давхараас доош цонхны амаглаа, тавцан хийгдэнэ. материал худалдан авалт хийх","dept":"ААХ алба","start":"2026-04-01","finish":"2026-11-30","actual_start":"","actual_finish":"","deadline":"2026-11-23","pct":0,"status":"pending","duration":"174 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Давхар бүрт Салхивч, агааржуулалтын хоолой, агаар цэвэршүүлэгч мотор тавьж үйл ажиллаганд оруулах. материал худалдан авалт хийх","dept":"ААХ алба","start":"2026-04-01","finish":"2026-11-30","actual_start":"","actual_finish":"","deadline":"2026-11-23","pct":0,"status":"pending","duration":"174 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Цэвэр бохир усны шугамын байгууламж хийгдэнэ. материал худалдан авалт хийх","dept":"ААХ алба","start":"2026-04-01","finish":"2026-11-30","actual_start":"","actual_finish":"","deadline":"2026-11-23","pct":0,"status":"pending","duration":"174 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Галын шугамын бүрэн гүйцэтгэл хийгдэнэ. материал худалдан авалт хийх","dept":"ААХ алба","start":"2026-04-01","finish":"2026-11-30","actual_start":"","actual_finish":"","deadline":"2026-11-23","pct":0,"status":"pending","duration":"174 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Уурын зуухны өргөтгөл, дээвэр, яндан, утаа сорогч, үнс баригч, уурын зуухаа суурлуулж, сангийн холболтыг холбож халаалтаа өгнө. материал худалдан авалт хийх","dept":"ААХ алба","start":"2026-04-01","finish":"2026-11-30","actual_start":"","actual_finish":"","deadline":"2026-11-23","pct":0,"status":"pending","duration":"174 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Барилгын цахилгааны дотор монтаж болон өндөр хүчдэлийн цахилгаан шугам татах КТП суурьлуулах, цахилгааны болон аянга зайлуулагч газардуулага хийх. Материалын худалдан авалт хйих","dept":"ААХ алба","start":"2026-04-01","finish":"2026-11-30","actual_start":"","actual_finish":"","deadline":"2026-11-23","pct":0,"status":"pending","duration":"174 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"4 давхар барилгын суурь цуцгаж уулын нууртай холбох ажил хийгдэнэ.","dept":"ААХ алба","start":"2026-04-01","finish":"2026-11-30","actual_start":"","actual_finish":"","deadline":"2026-11-23","pct":0,"status":"pending","duration":"174 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Барилгын гадна талд бохирын цэвэрлэгээний байгууламж барих. материал худалдан авалт хийх","dept":"ААХ алба","start":"2026-04-01","finish":"2026-11-30","actual_start":"","actual_finish":"","deadline":"2026-11-23","pct":0,"status":"pending","duration":"174 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Гадна дотор хяналтын камержуулалт хийгдэнэ.материал худалдан авалт хийх","dept":"ААХ алба","start":"2026-04-01","finish":"2026-11-30","actual_start":"","actual_finish":"","deadline":"2026-11-23","pct":0,"status":"pending","duration":"174 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Барилгыг тойрсон хог шороог цэвэрлэж, ногоон байгууламж болгох, гадна тохижилтын ажлууд хийгдэнэ. Объектыг бүрэн хамгаалсан хашаа барих. материал худалдан авалт хийх","dept":"ААХ алба","start":"2026-04-01","finish":"2026-11-30","actual_start":"","actual_finish":"","deadline":"2026-11-23","pct":0,"status":"pending","duration":"174 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Давхар бүрийн барааг суллаж улсын комисс хүлээж авахад бэлтгэнэ.","dept":"ААХ алба","start":"2026-04-01","finish":"2026-11-30","actual_start":"","actual_finish":"","deadline":"2026-11-23","pct":0,"status":"pending","duration":"174 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Нарны эрчим хүч ашиглах судалгаа хийх","dept":"ААХ алба","start":"2026-04-01","finish":"2026-11-30","actual_start":"","actual_finish":"","deadline":"2026-11-23","pct":0,"status":"pending","duration":"174 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Урдуур явсан шороон замыг бетон зам болгох д-1000","dept":"ААХ алба","start":"2026-04-01","finish":"2026-11-30","actual_start":"","actual_finish":"","deadline":"2026-11-23","pct":0,"status":"pending","duration":"174 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Оффис, гал тогоо, засварын хэсэгт өргөлгөл хийж 4 давхар барилга барих д-1000","dept":"ААХ алба","start":"2026-04-01","finish":"2026-11-30","actual_start":"","actual_finish":"","deadline":"2026-11-23","pct":0,"status":"pending","duration":"174 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Ашигтай талбайтай газар худалдан авах үнийн судалгаа хийх","dept":"ААХ алба","start":"2026-04-01","finish":"2026-11-30","actual_start":"","actual_finish":"","deadline":"2026-11-23","pct":0,"status":"pending","duration":"174 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Салбар нэгжид тухай бүрд хийгдэх ажлууд","dept":"ААХ алба","start":"2026-04-01","finish":"2026-11-30","actual_start":"","actual_finish":"","deadline":"2026-11-23","pct":0,"status":"pending","duration":"174 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Гэрэлтүүлэг нэмэх","dept":"ААХ алба","start":"2026-03-01","finish":"2026-03-31","actual_start":"","actual_finish":"","deadline":"2026-03-24","pct":0,"status":"not_started","duration":"23 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Камержуулалтыг нэмэгдүүлэх","dept":"ААХ алба","start":"2026-03-01","finish":"2026-03-31","actual_start":"","actual_finish":"","deadline":"2026-03-24","pct":0,"status":"not_started","duration":"23 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0},{"name":"Жижиг барааны арын ханыг засах","dept":"ААХ алба","start":"2026-04-01","finish":"2026-04-30","actual_start":"","actual_finish":"","deadline":"2026-04-23","pct":0,"status":"pending","duration":"22 days","cost":0,"actual_cost":0,"remaining_cost":0,"expected_spent":0}];
-
-// Stat with pending
-const _origRenderStats = renderStats;
-function renderStats() {
-  const n = ALL_TASKS.length;
-  const done = ALL_TASKS.filter(t => t.status==='done').length;
-  const prog = ALL_TASKS.filter(t => t.status==='in_progress').length;
-  const late = ALL_TASKS.filter(t => t.status==='late').length;
-  const nst  = ALL_TASKS.filter(t => t.status==='not_started').length;
-  const pend = ALL_TASKS.filter(t => t.status==='pending').length;
-  const avg  = n ? Math.round(ALL_TASKS.reduce((s,t)=>s+t.pct,0)/n) : 0;
-  document.getElementById('statsEl').innerHTML = `
-    <div class="stat-card"><div class="stat-num">${n}</div><div class="stat-lbl">Нийт ажил</div></div>
-    <div class="stat-card c-blue"><div class="stat-num">${prog}</div><div class="stat-lbl">Явагдаж байна</div></div>
-    <div class="stat-card c-green"><div class="stat-num">${done}</div><div class="stat-lbl">Дууссан</div></div>
-    <div class="stat-card c-red"><div class="stat-num">${late}</div><div class="stat-lbl">Хоцролттой</div></div>
-    <div class="stat-card c-amber"><div class="stat-num">${nst}</div><div class="stat-lbl">Эхлээгүй</div></div>
-    <div class="stat-card c-purple"><div class="stat-num">${pend}</div><div class="stat-lbl">Төлөвлөсөн</div></div>
-    <div class="stat-card c-gray"><div class="stat-num">${avg}%</div><div class="stat-lbl">Дундаж биелэлт</div></div>
-  `;
-}
-
-// Cost render
-function fmtT(v) {
-  if (!v || v === 0) return '—';
-  return v.toLocaleString('mn-MN') + ' ₮';
-}
-function fmtTm(v) {
-  if (!v || v === 0) return '—';
-  return (v/1000000).toFixed(1) + ' сая ₮';
-}
-
-function renderCost() {
-  var costTasks = ALL_TASKS.filter(function(t) { return t.cost > 0; }).sort(function(a,b) { return b.cost - a.cost; });
-  var totalCost = costTasks.reduce(function(s,t) { return s + t.cost; }, 0);
-  var totalActual = costTasks.reduce(function(s,t) { return s + (t.actual_cost||0); }, 0);
-
-  var deptMap = {};
-  costTasks.forEach(function(t) {
-    if (!deptMap[t.dept]) deptMap[t.dept] = {dept:t.dept, cost:0, actual:0, count:0};
-    deptMap[t.dept].cost += t.cost;
-    deptMap[t.dept].actual += (t.actual_cost||0);
-    deptMap[t.dept].count++;
-  });
-  var deptStats = Object.values(deptMap).sort(function(a,b) { return b.cost - a.cost; });
-
-  var STATUS_LBL = {done:'Дууссан', in_progress:'Явагдаж байна', late:'Хоцролттой', not_started:'Эхлээгүй', pending:'Төлөвлөсөн'};
-  var STATUS_CLR = {done:'#2f9e44', in_progress:'#228be6', late:'#e03131', not_started:'#e67700', pending:'#7048e8'};
-
-  var summaryCards = '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:20px">';
-  summaryCards += '<div style="background:#e7f5ff;border:1px solid #74c0fc;border-radius:10px;padding:16px">';
-  summaryCards += '<div style="font-size:11px;font-weight:600;color:#1971c2;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">НИЙТ ТӨЛӨВЛӨСӨН</div>';
-  summaryCards += '<div style="font-size:22px;font-weight:700;color:#1971c2">' + fmtTm(totalCost) + '</div>';
-  summaryCards += '<div style="font-size:11px;color:#1971c2;margin-top:3px">' + costTasks.length + ' ажилд зардал тооцогдсон</div></div>';
-
-  if (totalActual > 0) {
-    var diff = totalActual - totalCost;
-    var isOver = diff > 0;
-    summaryCards += '<div style="background:' + (isOver ? '#fff5f5' : '#ebfbee') + ';border:1px solid ' + (isOver ? '#ffa8a8' : '#69db7c') + ';border-radius:10px;padding:16px">';
-    summaryCards += '<div style="font-size:11px;font-weight:600;color:' + (isOver ? '#c92a2a' : '#2f9e44') + ';text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">' + (isOver ? '⚠ ХЭТЭРСЭН' : '✅ ХЭМНЭСЭН') + '</div>';
-    summaryCards += '<div style="font-size:22px;font-weight:700;color:' + (isOver ? '#c92a2a' : '#2f9e44') + '">' + fmtTm(Math.abs(diff)) + '</div>';
-    summaryCards += '<div style="font-size:11px;margin-top:3px">Бодит: ' + fmtTm(totalActual) + '</div></div>';
-  } else {
-    summaryCards += '<div style="background:#fff9db;border:1px solid #ffd43b;border-radius:10px;padding:16px">';
-    summaryCards += '<div style="font-size:11px;font-weight:600;color:#e67700;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">ХАМГИЙН ИХ ЗАРДАЛ</div>';
-    summaryCards += '<div style="font-size:18px;font-weight:700;color:#e67700">' + fmtT(costTasks[0] ? costTasks[0].cost : 0) + '</div>';
-    summaryCards += '<div style="font-size:11px;color:#e67700;margin-top:3px">' + (costTasks[0] ? costTasks[0].name.slice(0,25) + '...' : '') + '</div></div>';
-  }
-
-  deptStats.forEach(function(s) {
-    var pct = Math.round(s.cost / totalCost * 100);
-    summaryCards += '<div style="background:#f8f9fa;border:1px solid #dee2e6;border-radius:10px;padding:16px">';
-    summaryCards += '<div style="font-size:11px;font-weight:600;color:#495057;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">' + s.dept + '</div>';
-    summaryCards += '<div style="font-size:20px;font-weight:700;color:#228be6">' + fmtTm(s.cost) + '</div>';
-    summaryCards += '<div style="font-size:11px;color:#6c757d;margin-top:3px">Нийт зардлын ' + pct + '%';
-    if (s.actual > 0) {
-      var d = s.actual - s.cost;
-      summaryCards += ' · ' + (d > 0 ? '<span style="color:#c92a2a">+' + fmtTm(d) + ' хэтэрсэн</span>' : '<span style="color:#2f9e44">' + fmtTm(Math.abs(d)) + ' хэмнэсэн</span>');
-    }
-    summaryCards += '</div></div>';
-  });
-  summaryCards += '</div>';
-
-  // Dept table
-  var deptTable = '<div style="background:white;border:1px solid #dee2e6;border-radius:12px;overflow:hidden;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.08)">';
-  deptTable += '<div style="padding:12px 16px;font-size:13px;font-weight:600;border-bottom:1px solid #dee2e6;background:#f8f9fa">🏢 Хэлтэс бүрийн зардлын харьцуулалт</div>';
-  deptTable += '<table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr style="background:#f8f9fa">';
-  deptTable += '<th style="padding:9px 14px;text-align:left;border-bottom:1px solid #dee2e6;font-size:11px;font-weight:600;color:#6c757d">Хэлтэс</th>';
-  deptTable += '<th style="padding:9px 14px;text-align:right;border-bottom:1px solid #dee2e6;font-size:11px;font-weight:600;color:#6c757d">Ажил</th>';
-  deptTable += '<th style="padding:9px 14px;text-align:right;border-bottom:1px solid #dee2e6;font-size:11px;font-weight:600;color:#6c757d">Төлөвлөсөн</th>';
-  deptTable += '<th style="padding:9px 14px;text-align:right;border-bottom:1px solid #dee2e6;font-size:11px;font-weight:600;color:#6c757d">Бодит</th>';
-  deptTable += '<th style="padding:9px 14px;text-align:right;border-bottom:1px solid #dee2e6;font-size:11px;font-weight:600;color:#6c757d">Зөрүү</th>';
-  deptTable += '<th style="padding:9px 14px;text-align:left;border-bottom:1px solid #dee2e6;font-size:11px;font-weight:600;color:#6c757d;width:180px">Эзлэх хувь</th>';
-  deptTable += '</tr></thead><tbody>';
-  deptStats.forEach(function(s) {
-    var pct = Math.round(s.cost / totalCost * 100);
-    var diff = s.actual - s.cost;
-    var diffStr = s.actual > 0 ? (diff > 0 ? '<span style="color:#c92a2a">+' + fmtTm(diff) + '</span>' : '<span style="color:#2f9e44">' + fmtTm(Math.abs(diff)) + ' хэмнэлт</span>') : '<span style="color:#adb5bd">—</span>';
-    deptTable += '<tr style="border-bottom:1px solid #f1f3f5">';
-    deptTable += '<td style="padding:10px 14px;font-weight:600">' + s.dept + '</td>';
-    deptTable += '<td style="padding:10px 14px;text-align:right;color:#6c757d">' + s.count + '</td>';
-    deptTable += '<td style="padding:10px 14px;text-align:right;font-weight:600;color:#228be6">' + fmtT(s.cost) + '</td>';
-    deptTable += '<td style="padding:10px 14px;text-align:right">' + (s.actual > 0 ? fmtT(s.actual) : '<span style="color:#adb5bd">—</span>') + '</td>';
-    deptTable += '<td style="padding:10px 14px;text-align:right">' + diffStr + '</td>';
-    deptTable += '<td style="padding:10px 14px"><div style="display:flex;align-items:center;gap:8px"><div style="flex:1;background:#f1f3f5;border-radius:4px;height:10px"><div style="width:' + pct + '%;height:100%;background:#228be6;border-radius:4px"></div></div><span style="font-size:12px;font-weight:600;min-width:32px">' + pct + '%</span></div></td>';
-    deptTable += '</tr>';
-  });
-  // Total row
-  var totalDiff = totalActual - totalCost;
-  deptTable += '<tr style="background:#f8f9fa;font-weight:600"><td style="padding:10px 14px">Нийт дүн</td><td style="padding:10px 14px;text-align:right;color:#6c757d">' + costTasks.length + '</td>';
-  deptTable += '<td style="padding:10px 14px;text-align:right;color:#228be6;font-size:13px">' + fmtT(totalCost) + '</td>';
-  deptTable += '<td style="padding:10px 14px;text-align:right">' + (totalActual > 0 ? fmtT(totalActual) : '<span style="color:#adb5bd;font-weight:400">Actual Cost оруулаагүй</span>') + '</td>';
-  deptTable += '<td style="padding:10px 14px;text-align:right">' + (totalActual > 0 ? (totalDiff > 0 ? '<span style="color:#c92a2a">+' + fmtTm(totalDiff) + ' хэтрэлт</span>' : '<span style="color:#2f9e44">' + fmtTm(Math.abs(totalDiff)) + ' хэмнэлт</span>') : '—') + '</td>';
-  deptTable += '<td></td></tr>';
-  deptTable += '</tbody></table></div>';
-
-  // Task list table
-  var taskTable = '<div style="background:white;border:1px solid #dee2e6;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.08)">';
-  taskTable += '<div style="padding:12px 16px;font-size:13px;font-weight:600;border-bottom:1px solid #dee2e6;background:#f8f9fa">📋 Зардалтай бүх ажлуудын жагсаалт (' + costTasks.length + ' ажил) — их зардлаас эхлэн</div>';
-  taskTable += '<table style="width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed"><thead><tr style="background:#f8f9fa">';
-  taskTable += '<th style="padding:9px 14px;text-align:left;border-bottom:1px solid #dee2e6;font-size:11px;font-weight:600;color:#6c757d;width:38%">Ажлын нэр</th>';
-  taskTable += '<th style="padding:9px 14px;text-align:left;border-bottom:1px solid #dee2e6;font-size:11px;font-weight:600;color:#6c757d;width:11%">Хэлтэс</th>';
-  taskTable += '<th style="padding:9px 14px;text-align:left;border-bottom:1px solid #dee2e6;font-size:11px;font-weight:600;color:#6c757d;width:10%">Төлөв</th>';
-  taskTable += '<th style="padding:9px 14px;text-align:right;border-bottom:1px solid #dee2e6;font-size:11px;font-weight:600;color:#6c757d;width:14%">Төлөвлөсөн</th>';
-  taskTable += '<th style="padding:9px 14px;text-align:right;border-bottom:1px solid #dee2e6;font-size:11px;font-weight:600;color:#6c757d;width:14%">Бодит</th>';
-  taskTable += '<th style="padding:9px 14px;text-align:right;border-bottom:1px solid #dee2e6;font-size:11px;font-weight:600;color:#6c757d;width:13%">Зөрүү</th>';
-  taskTable += '</tr></thead><tbody>';
-  costTasks.forEach(function(t) {
-    var clr = STATUS_CLR[t.status] || '#adb5bd';
-    var lbl = STATUS_LBL[t.status] || '—';
-    var diff = (t.actual_cost||0) - t.cost;
-    var diffStr = t.actual_cost > 0 ? (diff > 0 ? '<span style="color:#c92a2a;font-weight:600">+' + fmtT(diff) + ' хэтрэлт</span>' : '<span style="color:#2f9e44;font-weight:600">' + fmtT(Math.abs(diff)) + ' хэмнэлт</span>') : '<span style="color:#adb5bd">—</span>';
-    taskTable += '<tr style="border-bottom:1px solid #f1f3f5">';
-    taskTable += '<td style="padding:8px 14px;word-break:break-word;white-space:normal;line-height:1.4">' + t.name + '</td>';
-    taskTable += '<td style="padding:8px 14px;color:#6c757d;font-size:11px">' + t.dept + '</td>';
-    taskTable += '<td style="padding:8px 14px"><span style="background:' + clr + '22;color:' + clr + ';padding:2px 7px;border-radius:20px;font-size:10px;font-weight:600">' + lbl + '</span></td>';
-    taskTable += '<td style="padding:8px 14px;text-align:right;font-weight:600;color:#228be6">' + fmtT(t.cost) + '</td>';
-    taskTable += '<td style="padding:8px 14px;text-align:right">' + (t.actual_cost > 0 ? fmtT(t.actual_cost) : '<span style="color:#adb5bd">—</span>') + '</td>';
-    taskTable += '<td style="padding:8px 14px;text-align:right">' + diffStr + '</td>';
-    taskTable += '</tr>';
-  });
-  taskTable += '</tbody></table></div>';
-
-  document.getElementById('costContent').innerHTML = summaryCards + deptTable + taskTable;
-}
-
-// Cost tab handler addition
-
-
-// Auto-load
-(function() {
-  ALL_TASKS = EMBEDDED_DATA;
-  ALL_TASKS.forEach(function(t) {
-    t.start = new Date(t.start);
-    t.finish = new Date(t.finish);
-    if (t.actual_start) t.actual_start = new Date(t.actual_start);
-    if (t.actual_finish) t.actual_finish = new Date(t.actual_finish);
-    if (t.deadline) t.deadline = new Date(t.deadline);
-  });
-  DEPTS = [...new Set(ALL_TASKS.map(function(t) { return t.dept; }).filter(Boolean))].sort();
-  document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById('dashContent').style.display = 'block';
-    document.getElementById('lastUpdated').textContent = 'Байдал: 2026-03-19';
-    initFilters();
     renderStats();
-    curPage = 1;
     renderList();
-  });
-})();
+    renderChart();
+    
+    document.getElementById('loadingEl').style.display = 'none';
+    document.getElementById('dashContent').style.display = 'block';
+    document.getElementById('lastUpdated').textContent = "Шинэчлэгдсэн: " + new Date().toLocaleTimeString();
+}
 
+function renderStats() {
+    const total = ALL_TASKS.length;
+    const done = ALL_TASKS.filter(t => t.pct >= 100).length;
+    document.getElementById('statsEl').innerHTML = `
+        <div class="stat-card"><div class="stat-num">${total}</div><div class="stat-lbl">Нийт ажил</div></div>
+        <div class="stat-card"><div class="stat-num">${done}</div><div class="stat-lbl">Дууссан</div></div>
+        <div class="stat-card"><div class="stat-num">${total - done}</div><div class="stat-lbl">Үлдсэн</div></div>
+    `;
+}
+
+function renderList() {
+    const body = document.getElementById('listBody');
+    body.innerHTML = ALL_TASKS.map(t => `
+        <tr>
+            <td>${t.name}</td>
+            <td style="color:var(--text2)">${t.dept}</td>
+            <td>${t.pct}%</td>
+            <td><span class="badge ${t.pct >= 100 ? 'b-done' : 'b-prog'}">${t.status}</span></td>
+        </tr>
+    `).join('');
+}
+
+function renderChart() {
+    const ctx = document.getElementById('deptChart').getContext('2d');
+    const depts = [...new Set(ALL_TASKS.map(t => t.dept))];
+    const data = depts.map(d => ALL_TASKS.filter(t => t.dept === d).length);
+
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: depts,
+            datasets: [{ data: data, backgroundColor: ['#228be6', '#40c057', '#fab005', '#fa5252', '#7950f2'] }]
+        }
+    });
+}
+
+function switchTab(id, el) {
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    el.classList.add('active');
+}
 </script>
 </body>
 </html>
