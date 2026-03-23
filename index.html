@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Consolidated Plan 2026 — Дашбоард</title>
+<title>Consolidated Plan 2026</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
   :root {
@@ -17,179 +17,1104 @@
     --green: #2f9e44; --green-light: #ebfbee;
     --red: #e03131; --red-light: #fff5f5;
     --amber: #e67700; --amber-light: #fff9db;
+    --gray: #868e96; --gray-light: #f8f9fa;
+    --purple: #7048e8; --purple-light: #f3f0ff;
+    --purple: #7048e8; --purple-light: #f3f0ff;
     --radius: 8px; --radius-lg: 12px;
     --shadow: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.06);
+    --shadow-md: 0 4px 6px rgba(0,0,0,.07), 0 2px 4px rgba(0,0,0,.05);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); font-size: 14px; }
+  body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.5; }
 
+  /* Layout */
   .header { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; box-shadow: var(--shadow); }
-  .logo { width: 32px; height: 32px; background: var(--blue); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; }
+  .header-left { display: flex; align-items: center; gap: 12px; }
+  .logo { width: 32px; height: 32px; background: var(--blue); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 14px; }
+  .header-title { font-size: 16px; font-weight: 600; }
+  .header-sub { font-size: 12px; color: var(--text2); }
+  .last-updated { font-size: 11px; color: var(--text3); background: var(--bg3); padding: 4px 10px; border-radius: 20px; }
+
   .container { max-width: 1400px; margin: 0 auto; padding: 20px 24px; }
 
-  /* GitHub Auto-Load Banner */
-  .sync-banner { background: #e7f5ff; border: 1px solid #74c0fc; padding: 12px; border-radius: var(--radius); margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
-  
+  /* Upload */
+  .upload-wrap { margin-bottom: 20px; }
+  .upload-zone { border: 2px dashed var(--border2); border-radius: var(--radius-lg); padding: 24px 20px; text-align: center; transition: all .2s; background: var(--bg2); }
+  .upload-zone.drag { border-color: var(--blue); background: var(--blue-light); }
+  .upload-zone.loaded { border-color: var(--green); background: var(--green-light); border-style: solid; padding: 14px; }
+  .upload-icon { font-size: 32px; margin-bottom: 8px; }
+  .upload-title { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+  .upload-sub { font-size: 12px; color: var(--text2); margin-bottom: 12px; }
+  .upload-btn { display: inline-block; background: var(--blue); color: white; font-size: 14px; font-weight: 600; padding: 11px 32px; border-radius: 8px; border: none; cursor: pointer; transition: background .15s; }
+  .upload-btn:hover { background: var(--blue-dark); }
+  .upload-steps { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 12px; }
+  .upload-steps span { background: var(--bg3); border: 1px solid var(--border); border-radius: 20px; padding: 3px 10px; font-size: 11px; color: var(--text2); }
+  .upload-meta { display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; }
+  .upload-file-info { font-size: 13px; font-weight: 500; color: var(--green); }
+  .btn-reset { font-size: 12px; padding: 4px 12px; border: 1px solid var(--border2); border-radius: 20px; background: white; color: var(--text2); cursor: pointer; transition: all .15s; }
+  .btn-reset:hover { background: var(--red-light); border-color: var(--red); color: var(--red); }
+
+  /* Stats */
   .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin-bottom: 20px; }
   .stat-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px; box-shadow: var(--shadow); }
-  .stat-num { font-size: 24px; font-weight: 600; color: var(--blue); }
-  
-  .tabs { display: flex; gap: 5px; border-bottom: 2px solid var(--border); margin-bottom: 16px; }
-  .tab { padding: 10px 20px; cursor: pointer; border: none; background: none; color: var(--text2); }
-  .tab.active { color: var(--blue); border-bottom: 2px solid var(--blue); font-weight: 600; }
-  
+  .stat-num { font-size: 28px; font-weight: 600; line-height: 1; margin-bottom: 4px; }
+  .stat-lbl { font-size: 11px; color: var(--text2); font-weight: 500; text-transform: uppercase; letter-spacing: .4px; }
+  .stat-card.c-blue .stat-num { color: var(--blue); }
+  .stat-card.c-green .stat-num { color: var(--green); }
+  .stat-card.c-red .stat-num { color: var(--red); }
+  .stat-card.c-amber .stat-num { color: var(--amber); }
+  .stat-card.c-gray .stat-num { color: var(--gray); }
+  .stat-card.c-purple .stat-num { color: #7048e8; }
+  .stat-card.c-purple .stat-num { color: var(--purple); }
+
+  /* Tabs */
+  .tabs { display: flex; gap: 2px; border-bottom: 2px solid var(--border); margin-bottom: 16px; }
+  .tab { padding: 8px 18px; font-size: 13px; font-weight: 500; cursor: pointer; border: none; background: none; color: var(--text2); border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all .15s; border-radius: 6px 6px 0 0; }
+  .tab:hover { background: var(--bg3); color: var(--text); }
+  .tab.active { color: var(--blue); border-bottom-color: var(--blue); background: var(--blue-light); }
   .view { display: none; }
   .view.active { display: block; }
-  
-  .table-wrap { overflow-x: auto; background: white; border-radius: var(--radius); border: 1px solid var(--border); }
-  table { width: 100%; border-collapse: collapse; }
-  th { background: var(--bg3); padding: 12px; text-align: left; font-size: 11px; text-transform: uppercase; }
-  td { padding: 12px; border-bottom: 1px solid var(--border); }
-  
-  .badge { padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 600; }
-  .b-done { background: var(--green-light); color: var(--green); }
-  .b-prog { background: var(--blue-light); color: var(--blue); }
 
-  #loadingEl { text-align: center; padding: 50px; }
-  .spinner { border: 4px solid rgba(0,0,0,0.1); width: 36px; height: 36px; border-radius: 50%; border-left-color: var(--blue); animation: spin 1s linear infinite; display: inline-block; }
+  /* Filters */
+  .filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; align-items: center; }
+  .filters select, .filters input { font-size: 12px; padding: 6px 10px; border: 1px solid var(--border2); border-radius: var(--radius); background: var(--bg2); color: var(--text); outline: none; transition: border-color .15s; }
+  .filters select:focus, .filters input:focus { border-color: var(--blue); }
+  .filter-count { font-size: 11px; color: var(--text3); background: var(--bg3); padding: 4px 10px; border-radius: 20px; }
+
+  /* Table */
+  .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow); }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; table-layout: fixed; }
+  thead th { background: var(--bg3); padding: 9px 12px; font-size: 11px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: .4px; border-bottom: 1px solid var(--border); text-align: left; white-space: nowrap; }
+  tbody td { padding: 8px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  tbody td.td-name { white-space: normal; word-break: break-word; line-height: 1.45; overflow: visible; text-overflow: unset; }
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(100px,1fr)); gap: 8px; margin-bottom: 14px; }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover td { background: var(--bg3); }
+
+  /* Badges */
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 600; white-space: nowrap; }
+  .b-done { background: var(--green-light); color: var(--green); }
+  .b-late { background: var(--red-light); color: var(--red); }
+  .b-prog { background: var(--blue-light); color: var(--blue); }
+  .b-pend { background: var(--bg3); color: var(--gray); }
+  .b-nst  { background: var(--amber-light); color: var(--amber); }
+
+  /* Progress bar */
+  .pbar { height: 4px; border-radius: 2px; background: var(--bg3); margin-top: 3px; min-width: 60px; }
+  .pfill { height: 100%; border-radius: 2px; transition: width .3s; }
+
+  /* Pagination */
+  .pag { display: flex; gap: 8px; align-items: center; margin-top: 14px; font-size: 12px; color: var(--text2); }
+  .pag button { padding: 5px 14px; border: 1px solid var(--border2); border-radius: var(--radius); background: var(--bg2); color: var(--text); cursor: pointer; font-size: 12px; transition: all .15s; }
+  .pag button:hover { background: var(--blue-light); border-color: var(--blue); color: var(--blue); }
+  .pag button:disabled { opacity: .4; cursor: not-allowed; }
+
+  /* Gantt */
+  .gantt-container { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow-x: auto; box-shadow: var(--shadow); }
+  .gantt-header { display: flex; background: var(--bg3); border-bottom: 1px solid var(--border); }
+  .gantt-label-header { min-width: 240px; padding: 8px 12px; font-size: 11px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: .4px; border-right: 1px solid var(--border); }
+  .gantt-months { display: flex; flex: 1; }
+  .gantt-month { flex: 1; text-align: center; padding: 8px 4px; font-size: 11px; font-weight: 600; color: var(--text2); border-right: 1px solid var(--border); }
+  .gantt-month:last-child { border-right: none; }
+  .gantt-row { display: flex; border-bottom: 1px solid var(--border); align-items: center; min-height: 30px; }
+  .gantt-row:last-child { border-bottom: none; }
+  .gantt-row:hover { background: var(--bg3); }
+  .gantt-task-name { min-width: 240px; padding: 5px 12px; font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; border-right: 1px solid var(--border); color: var(--text); }
+  .gantt-bars { flex: 1; position: relative; height: 30px; }
+  .today-line { position: absolute; width: 1.5px; height: 100%; top: 0; background: var(--red); opacity: .5; z-index: 2; }
+  .gantt-bar { position: absolute; height: 14px; top: 8px; border-radius: 3px; opacity: .85; transition: opacity .15s; }
+  .gantt-bar:hover { opacity: 1; }
+  .gantt-bar-fill { position: absolute; height: 14px; top: 8px; border-radius: 3px; opacity: 1; }
+  .gantt-pct { position: absolute; font-size: 9px; color: white; top: 10px; left: 4px; white-space: nowrap; overflow: hidden; pointer-events: none; }
+  .gantt-legend { display: flex; gap: 16px; padding: 10px 14px; border-top: 1px solid var(--border); font-size: 11px; color: var(--text2); flex-wrap: wrap; }
+  .gantt-legend span { display: flex; align-items: center; gap: 5px; }
+  .gantt-legend i { display: inline-block; width: 12px; height: 8px; border-radius: 2px; }
+
+  /* Dept chart */
+  .dept-wrap { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; box-shadow: var(--shadow); margin-bottom: 16px; }
+  .dept-table-wrap { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow); }
+  .dept-table-wrap table th { background: var(--bg3); }
+
+  /* Alerts */
+  .alert { padding: 10px 14px; border-radius: var(--radius); margin-bottom: 8px; font-size: 12px; border-left: 3px solid; }
+  .alert-r { background: var(--red-light); border-color: var(--red); }
+  .alert-y { background: var(--amber-light); border-color: var(--amber); }
+  .alert-g { background: var(--green-light); border-color: var(--green); }
+  .alert strong { font-weight: 600; }
+  .sec-title { font-size: 11px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: .5px; margin: 16px 0 8px; }
+  .sec-title:first-child { margin-top: 0; }
+
+  /* Loading */
+  .loading { text-align: center; padding: 40px; color: var(--text2); }
+  .spinner { width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--blue); border-radius: 50%; animation: spin .8s linear infinite; margin: 0 auto 12px; }
   @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Empty state */
+  .empty { text-align: center; padding: 48px; color: var(--text2); }
+  .empty-icon { font-size: 40px; margin-bottom: 12px; }
+  .empty-title { font-size: 15px; font-weight: 500; margin-bottom: 6px; color: var(--text); }
+
+  /* Card */
+  .card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow); }
 </style>
 </head>
 <body>
 
 <div class="header">
-  <div style="display:flex; align-items:center; gap:12px;">
+  <div class="header-left">
     <div class="logo">CP</div>
     <div>
-      <div style="font-weight:600">Consolidated Plan 2026</div>
-      <div style="font-size:12px; color:var(--text2)">GitHub Live Dashboard</div>
+      <div class="header-title">Consolidated Plan 2026</div>
+      <div class="header-sub">Төслийн удирдлагын дашбоард</div>
     </div>
   </div>
-  <span id="lastUpdated" style="font-size:11px; color:var(--text3)">Уншиж байна...</span>
+  <span class="last-updated" id="lastUpdated">Файл уншигдаагүй байна</span>
 </div>
 
 <div class="container">
-  <div class="sync-banner">
-    <div style="font-size: 13px;"><strong>GitHub Sync:</strong> Өгөгдлийг <code>database.xlsx</code>-ээс автоматаар уншиж байна.</div>
-    <input type="file" id="fileInput" hidden onchange="handleManualFile(this.files[0])">
-    <button onclick="document.getElementById('fileInput').click()" style="font-size:11px; padding:4px 8px; cursor:pointer;">Файл гараар сонгох</button>
+
+  <!-- Upload -->
+  <div class="upload-wrap">
+    <div class="upload-zone" id="dropZone"
+      ondragover="event.preventDefault();this.classList.add('drag')"
+      ondragleave="this.classList.remove('drag')"
+      ondrop="handleDrop(event)">
+      <div id="uploadContent">
+        <div class="upload-icon">📊</div>
+        <div class="upload-title">Consolidated Plan 2026 Дашбоард</div>
+        <div class="upload-sub">database.xlsx файлаа оруулна уу</div>
+        <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
+          📂 &nbsp; database.xlsx сонгох
+        </button>
+        <div class="upload-steps">
+          <span>1️⃣ MS Project → Export → database.xlsx</span>
+          <span>2️⃣ Энд файл сонгох</span>
+          <span>3️⃣ Дашбоард шинэчлэгдэнэ ✅</span>
+        </div>
+      </div>
+      <div id="uploadedContent" style="display:none">
+        <div class="upload-meta">
+          <div class="upload-icon" style="font-size:24px;margin:0">✅</div>
+          <div>
+            <div class="upload-file-info" id="fileInfoText"></div>
+            <div class="upload-sub" id="fileSubText"></div>
+          </div>
+          <button class="btn-reset" onclick="event.stopPropagation();resetUpload()">🔄 Файл шинэчлэх</button>
+        </div>
+      </div>
+    </div>
+    <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleFile(this.files[0])">
   </div>
 
-  <div id="loadingEl"><div class="spinner"></div><p>Мэдээллийг боловсруулж байна...</p></div>
+  <div id="loadingEl" style="display:none" class="loading">
+    <div class="spinner"></div>
+    <div>Файл уншиж байна...</div>
+  </div>
 
+  <!-- Dashboard -->
   <div id="dashContent" style="display:none">
+
+    <!-- Stats -->
     <div class="stats" id="statsEl"></div>
 
-    <div class="tabs">
-      <div class="tab active" onclick="switchTab('list', this)">📋 Ажлын жагсаалт</div>
-      <div class="tab" onclick="switchTab('charts', this)">📊 График</div>
+    <!-- Tabs -->
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:0">
+  <div class="tabs" style="margin-bottom:0;border-bottom:none;flex:1">
+      <button class="tab active" onclick="showTab('list',this)">📋 Ажлын жагсаалт</button>
+      <button class="tab" onclick="showTab('gantt',this)">📊 Гантт диаграм</button>
+      <button class="tab" onclick="showTab('dept',this)">🏢 Хэлтэсийн дүн</button>
+      <button class="tab" onclick="showTab('alerts',this)">🔔 Анхааруулга</button>
+      <button class="tab" onclick="showTab('cost',this)">💰 Зардал</button>
+  </div>
+  <button onclick="exportPDF()" id="pdfBtn" style="display:none;padding:7px 16px;background:#e03131;color:white;border:none;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap">📄 PDF татах</button>
+</div>
     </div>
 
+    <!-- List -->
     <div id="list" class="view active">
+      <div class="filters">
+        <select id="fDept" onchange="renderList()"><option value="">Бүх хэлтэс</option></select>
+        <select id="fStatus" onchange="renderList()">
+          <option value="">Бүх төлөв</option>
+          <option value="in_progress">Явагдаж байна</option>
+          <option value="not_started">Эхлээгүй</option>
+          <option value="pending">Төлөвлөсөн</option>
+          <option value="late">Хоцролттой</option>
+          <option value="done">Дууссан</option>
+        </select>
+        <input type="text" id="fSearch" placeholder="🔍 Хайх..." oninput="curPage=1;renderList()" style="width:200px">
+        <span class="filter-count" id="filterCount"></span>
+      </div>
       <div class="table-wrap">
         <table>
-          <thead>
-            <tr><th>Ажлын нэр</th><th>Хэлтэс</th><th>Биелэлт</th><th>Төлөв</th></tr>
-          </thead>
+          <thead><tr>
+            <th style="width:44%">Ажлын нэр</th>
+            <th style="width:10%">Хэлтэс</th>
+            <th style="width:9%">Эхлэх</th>
+            <th style="width:9%">Дуусах</th>
+            <th style="width:15%">Биелэлт</th>
+            <th style="width:10%">Төлөв</th>
+            <th style="width:10%">Хугацаа</th>
+          </tr></thead>
           <tbody id="listBody"></tbody>
+        </table>
+      </div>
+      <div class="pag">
+        <button id="prevBtn" onclick="changePage(-1)">‹ Өмнөх</button>
+        <span id="pageInfo" style="min-width:140px;text-align:center"></span>
+        <button id="nextBtn" onclick="changePage(1)">Дараах ›</button>
+      </div>
+    </div>
+
+    <!-- Gantt -->
+    <div id="gantt" class="view">
+      <div class="filters">
+        <select id="gDept" onchange="renderGantt()"><option value="">Бүх хэлтэс</option></select>
+        <select id="gQtr" onchange="renderGantt()">
+          <option value="">Жилийн хэмжээнд</option>
+          <option value="1">1-р улирал (1–3 сар)</option>
+          <option value="2">2-р улирал (4–6 сар)</option>
+          <option value="3">3-р улирал (7–9 сар)</option>
+          <option value="4">4-р улирал (10–12 сар)</option>
+        </select>
+      </div>
+      <div class="gantt-container" id="ganttEl"></div>
+    </div>
+
+    <!-- Dept -->
+    <div id="dept" class="view">
+      <div class="dept-wrap">
+        <div style="position:relative;height:280px"><canvas id="deptChart"></canvas></div>
+      </div>
+      <div class="dept-table-wrap">
+        <table>
+          <thead><tr>
+            <th>Хэлтэс</th>
+            <th style="text-align:right">Нийт</th>
+            <th style="text-align:right">Явагдаж байна</th>
+            <th style="text-align:right">Дууссан</th>
+            <th style="text-align:right">Хоцролттой</th>
+            <th style="text-align:right">Эхлээгүй</th>
+            <th style="text-align:right">Төлөвлөсөн</th>
+            <th style="width:200px;text-align:right">Дундаж биелэлт</th>
+          </tr></thead>
+          <tbody id="deptBody"></tbody>
         </table>
       </div>
     </div>
 
-    <div id="charts" class="view">
-        <div style="max-width: 600px; margin: auto;"><canvas id="deptChart"></canvas></div>
-    </div>
+    <!-- Alerts -->
+    <div id="alerts" class="view" id="alertsEl"></div>
+
+    <!-- Cost -->
+    <div id="cost" class="view"><div id="costContent"></div></div>
+
   </div>
 </div>
 
 <script>
-let ALL_TASKS = [];
-const EXCEL_FILE_PATH = 'database.xlsx'; // Make sure your file is named exactly this in GitHub
+let ALL_TASKS = [], DEPTS = [], filtered = [], curPage = 1;
+const PAGE_SIZE = 30;
+const TODAY = new Date(); TODAY.setHours(0,0,0,0);
+let deptChart = null;
 
-// 1. Auto-load from GitHub on Startup
-window.onload = function() {
-    fetch(EXCEL_FILE_PATH)
-        .then(res => {
-            if (!res.ok) throw new Error("Excel файл олдсонгүй");
-            return res.arrayBuffer();
-        })
-        .then(buffer => parseExcel(buffer))
-        .catch(err => {
-            console.error(err);
-            document.getElementById('loadingEl').innerHTML = "⚠️ GitHub дээр 'database.xlsx' файл олдсонгүй. Гараар оруулна уу.";
-        });
-};
-
-function handleManualFile(file) {
-    const reader = new FileReader();
-    reader.onload = e => parseExcel(e.target.result);
-    reader.readAsArrayBuffer(file);
+// ── FILE HANDLING ──────────────────────────────────────────────────────────
+function handleDrop(ev) {
+  ev.preventDefault();
+  document.getElementById('dropZone').classList.remove('drag');
+  const f = ev.dataTransfer.files[0];
+  if (f) handleFile(f);
 }
 
-function parseExcel(data) {
-    const workbook = XLSX.read(data, { type: 'array' });
-    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-    const rows = XLSX.utils.sheet_to_json(firstSheet);
 
-    // Map your MS Project columns here
-    ALL_TASKS = rows.map(row => ({
-        name: row['Name'] || row['Task Name'] || 'Нэргүй',
-        dept: row['Resource Names'] || row['Department'] || 'Тодорхойгүй',
-        pct: parseFloat(row['% Complete']) || 0,
-        status: row['Status'] || (parseFloat(row['% Complete']) >= 100 ? 'Дууссан' : 'Явагдаж байна')
-    }));
-
-    renderStats();
-    renderList();
-    renderChart();
-    
-    document.getElementById('loadingEl').style.display = 'none';
-    document.getElementById('dashContent').style.display = 'block';
-    document.getElementById('lastUpdated').textContent = "Шинэчлэгдсэн: " + new Date().toLocaleTimeString();
+// Auto-load database.xlsx from same directory (GitHub Pages)
+async function autoLoadDatabase() {
+  try {
+    const res = await fetch('./database.xlsx');
+    if (!res.ok) return;
+    const buf = await res.arrayBuffer();
+    parseExcel(buf, 'database.xlsx');
+  } catch(e) {
+    console.log('database.xlsx not found, use upload UI');
+  }
 }
 
-function renderStats() {
-    const total = ALL_TASKS.length;
-    const done = ALL_TASKS.filter(t => t.pct >= 100).length;
-    document.getElementById('statsEl').innerHTML = `
-        <div class="stat-card"><div class="stat-num">${total}</div><div class="stat-lbl">Нийт ажил</div></div>
-        <div class="stat-card"><div class="stat-num">${done}</div><div class="stat-lbl">Дууссан</div></div>
-        <div class="stat-card"><div class="stat-num">${total - done}</div><div class="stat-lbl">Үлдсэн</div></div>
-    `;
+function handleFile(file) {
+  if (!file) return;
+  document.getElementById('dashContent').style.display = 'none';
+  const reader = new FileReader();
+  reader.onload = e => {
+    try { parseExcel(e.target.result, file.name); }
+    catch (err) {
+          alert('Алдаа гарлаа: ' + err.message + '\n\nБаганын нэрийг шалгана уу.');
+    }
+  };
+  reader.readAsArrayBuffer(file);
 }
 
-function renderList() {
-    const body = document.getElementById('listBody');
-    body.innerHTML = ALL_TASKS.map(t => `
-        <tr>
-            <td>${t.name}</td>
-            <td style="color:var(--text2)">${t.dept}</td>
-            <td>${t.pct}%</td>
-            <td><span class="badge ${t.pct >= 100 ? 'b-done' : 'b-prog'}">${t.status}</span></td>
-        </tr>
-    `).join('');
-}
+function parseExcel(buf, fileName) {
+  const wb = XLSX.read(buf, { type: 'array', cellDates: true });
+  const ws = wb.Sheets[wb.SheetNames[0]];
+  const rows = XLSX.utils.sheet_to_json(ws, { raw: false, defval: '' });
+  if (!rows.length) throw new Error('Хоосон файл');
 
-function renderChart() {
-    const ctx = document.getElementById('deptChart').getContext('2d');
-    const depts = [...new Set(ALL_TASKS.map(t => t.dept))];
-    const data = depts.map(d => ALL_TASKS.filter(t => t.dept === d).length);
+  const keys = Object.keys(rows[0]);
+  // Exact match first, then partial match
+  const findExact = (...names) => {
+    for (const n of names) {
+      const k = keys.find(k => k.toLowerCase() === n.toLowerCase());
+      if (k) return k;
+    }
+    return null;
+  };
+  const find = (...patterns) => {
+    for (const p of patterns) {
+      const k = keys.find(k => k.toLowerCase().replace(/[_\s]/g,'').includes(p.toLowerCase().replace(/[_\s]/g,'')));
+      if (k) return k;
+    }
+    return null;
+  };
 
-    new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: depts,
-            datasets: [{ data: data, backgroundColor: ['#228be6', '#40c057', '#fab005', '#fa5252', '#7950f2'] }]
-        }
+  // Name: exact match эхлээд хайна — Resource_Names-тэй андуурахгүйн тулд
+  const cName   = findExact('name','task_name','taskname') || find('taskname','нэр');
+  const cStart  = findExact('start','start_date','startdate') || find('startdate','start','эхлэх');
+  const cFinish = findExact('finish','finish_date','finishdate','end','end_date') || find('finishdate','finish','дуусах');
+  const cPct    = findExact('percent_complete','percentcomplete','%_complete') || find('percentcomplete','percent','pct','биелэлт');
+  const cDept   = findExact('resource_names','resourcenames','resource','dept') || find('resourcenames','хэлтэс','алба');
+  const cDur    = findExact('duration','хугацаа') || find('duration');
+  const cActS   = findExact('actual_start','actualstart') || find('actualstart');
+  const cActF   = findExact('actual_finish','actualfinish') || find('actualfinish');
+  const cDead   = findExact('deadline','эцсийн') || find('deadline');
+  const cCost   = findExact('төлөвлөсөн_зардал','cost','fixed_cost') || find('төлөвлөсөн','зардал','cost','fixedcost');
+  const cActC   = findExact('бодит_зардал','actual_cost','actualcost') || find('бодит','actualcost');
+  const cRemC   = findExact('хэмнэл,_хэтрэлт','remaining_cost','remainingcost') || find('хэмнэл','хэтрэлт','remainingcost');
+
+  if (!cName || !cStart || !cFinish) throw new Error(`Шаардлагатай багана олдсонгүй.\nОлдсон баганууд: ${keys.join(', ')}`);
+
+  function parseD(v) {
+    if (!v || v === '') return null;
+    if (v instanceof Date) return isNaN(v) ? null : v;
+    const d = new Date(v);
+    return isNaN(d) ? null : d;
+  }
+  function parsePct(v) {
+    if (v === '' || v == null) return 0;
+    const n = parseFloat(String(v).replace('%',''));
+    return isNaN(n) ? 0 : n > 1 ? Math.round(n) : Math.round(n * 100);
+  }
+  function getStatus(s, f, pct, actF) {
+    if (pct >= 100 || actF) return 'done';
+    if (!s || s > TODAY) return 'pending';
+    if (TODAY > f && pct < 100) return 'late';
+    if (pct === 0 && s <= TODAY) return 'not_started';
+    return 'in_progress';
+  }
+
+  ALL_TASKS = [];
+  rows.forEach((row, i) => {
+    const name = String(row[cName] || '').trim();
+    if (!name || name === 'nan') return;
+    const start = parseD(row[cStart]);
+    const finish = parseD(row[cFinish]);
+    if (!start || !finish) return;
+    const pct  = parsePct(cPct ? row[cPct] : 0);
+    const dept = cDept ? String(row[cDept] || '').trim() : '';
+    const actS = cActS ? parseD(row[cActS]) : null;
+    const actF = cActF ? parseD(row[cActF]) : null;
+    const dead = cDead ? parseD(row[cDead]) : null;
+    ALL_TASKS.push({
+      id: i+1, name, dept,
+      start, finish, actS, actF, dead,
+      pct, status: getStatus(start, finish, pct, actF),
+      duration: cDur ? String(row[cDur] || '') : '',
+      cost: cCost ? (parseFloat(String(row[cCost]).replace(/[^0-9.-]/g,'')) || 0) : 0,
+      actual_cost: cActC ? (parseFloat(String(row[cActC]).replace(/[^0-9.-]/g,'')) || 0) : 0,
+      remaining_cost: cRemC ? (parseFloat(String(row[cRemC]).replace(/[^0-9.-]/g,'')) || 0) : 0
     });
+  });
+
+  if (!ALL_TASKS.length) throw new Error('Ажил олдсонгүй');
+  DEPTS = [...new Set(ALL_TASKS.map(t => t.dept).filter(Boolean))].sort();
+
+  // Update UI
+  document.getElementById('dashContent').style.display = 'block';
+
+  const dz = document.getElementById('dropZone');
+  dz.classList.add('loaded');
+  document.getElementById('uploadContent').style.display = 'none';
+  document.getElementById('uploadedContent').style.display = 'block';
+  document.getElementById('fileInfoText').textContent = '📄 ' + fileName;
+  document.getElementById('fileSubText').textContent = ALL_TASKS.length + ' ажил амжилттай уншигдлаа';
+
+  const now = new Date();
+  document.getElementById('pdfBtn').style.display='block';
+  document.getElementById('lastUpdated').textContent = `Шинэчлэгдсэн: ${now.toLocaleDateString('mn-MN')} ${now.toLocaleTimeString('mn-MN', {hour:'2-digit',minute:'2-digit'})}`;
+
+  initFilters();
+  renderStats();
+  curPage = 1;
+  renderList();
 }
 
-function switchTab(id, el) {
-    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
-    el.classList.add('active');
+function resetUpload() {
+  ALL_TASKS = []; DEPTS = []; filtered = [];
+  const dz = document.getElementById('dropZone');
+  dz.classList.remove('loaded');
+  document.getElementById('uploadContent').style.display = 'block';
+  document.getElementById('uploadedContent').style.display = 'none';
+  document.getElementById('dashContent').style.display = 'none';
+  document.getElementById('fileInput').value = '';
+  document.getElementById('pdfBtn').style.display='none';
+  document.getElementById('pdfBtn').style.display='block';
+  document.getElementById('lastUpdated').textContent = 'Файл уншигдаагүй байна';
+  if (deptChart) { deptChart.destroy(); deptChart = null; }
 }
+
+// ── HELPERS ────────────────────────────────────────────────────────────────
+const STATUS_MAP = {
+  done:        ['b-done', 'Дууссан'],
+  in_progress: ['b-prog', 'Явагдаж байна'],
+  late:        ['b-late', 'Хоцролттой'],
+  not_started: ['b-nst',  'Эхлээгүй'],
+  pending:     ['b-pend', 'Төлөвлөсөн']
+};
+function badge(s) {
+  const [cls, lbl] = STATUS_MAP[s] || ['b-pend','?'];
+  return `<span class="badge ${cls}">${lbl}</span>`;
+}
+function pbar(pct) {
+  const c = pct >= 100 ? '#2f9e44' : pct > 0 ? '#228be6' : '#adb5bd';
+  return `<div style="font-size:11px;font-weight:500">${pct}%<div class="pbar"><div class="pfill" style="width:${Math.min(100,pct)}%;background:${c}"></div></div></div>`;
+}
+function fmtDate(d) {
+  if (!d) return '';
+  return d.toLocaleDateString('mn-MN', { month:'2-digit', day:'2-digit' });
+}
+
+// ── INIT FILTERS ───────────────────────────────────────────────────────────
+function initFilters() {
+  ['fDept','gDept'].forEach(id => {
+    const el = document.getElementById(id);
+    while (el.options.length > 1) el.remove(1);
+    DEPTS.forEach(d => { const o = document.createElement('option'); o.value = d; o.textContent = d; el.appendChild(o); });
+  });
+}
+
+// ── STATS ──────────────────────────────────────────────────────────────────
+function renderStats() {
+  const n       = ALL_TASKS.length;
+  const done    = ALL_TASKS.filter(t => t.status === 'done').length;
+  const prog    = ALL_TASKS.filter(t => t.status === 'in_progress').length;
+  const late    = ALL_TASKS.filter(t => t.status === 'late').length;
+  const nst     = ALL_TASKS.filter(t => t.status === 'not_started').length;
+  const pending = ALL_TASKS.filter(t => t.status === 'pending').length;
+  const avg     = n ? Math.round(ALL_TASKS.reduce((s,t) => s+t.pct, 0) / n) : 0;
+  document.getElementById('statsEl').innerHTML = `
+    <div class="stat-card"><div class="stat-num">${n}</div><div class="stat-lbl">Нийт ажил</div></div>
+    <div class="stat-card c-blue"><div class="stat-num">${prog}</div><div class="stat-lbl">Явагдаж байна</div></div>
+    <div class="stat-card c-green"><div class="stat-num">${done}</div><div class="stat-lbl">Дууссан</div></div>
+    <div class="stat-card c-red"><div class="stat-num">${late}</div><div class="stat-lbl">Хоцролттой</div></div>
+    <div class="stat-card c-amber"><div class="stat-num">${nst}</div><div class="stat-lbl">Эхлээгүй</div></div>
+    <div class="stat-card c-purple"><div class="stat-num">${pending}</div><div class="stat-lbl">Төлөвлөсөн</div></div>
+    <div class="stat-card c-gray"><div class="stat-num">${avg}%</div><div class="stat-lbl">Дундаж биелэлт</div></div>
+  `;
+}
+
+// ── LIST ───────────────────────────────────────────────────────────────────
+function renderList() {
+  const dept   = document.getElementById('fDept').value;
+  const status = document.getElementById('fStatus').value;
+  const search = document.getElementById('fSearch').value.toLowerCase();
+  filtered = ALL_TASKS.filter(t =>
+    (!dept   || t.dept === dept) &&
+    (!status || t.status === status) &&
+    (!search || t.name.toLowerCase().includes(search) || t.dept.toLowerCase().includes(search))
+  );
+  const total = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  if (curPage > total) curPage = 1;
+  const page = filtered.slice((curPage-1)*PAGE_SIZE, curPage*PAGE_SIZE);
+  document.getElementById('filterCount').textContent = `${filtered.length} ажил`;
+  document.getElementById('listBody').innerHTML = page.map(t => `<tr>
+    <td class="td-name">${t.name}</td>
+    <td style="color:var(--text2)">${t.dept}</td>
+    <td>${fmtDate(t.start)}</td>
+    <td>${fmtDate(t.finish)}</td>
+    <td>${pbar(t.pct)}</td>
+    <td>${badge(t.status)}</td>
+    <td style="color:var(--text2);font-size:11px">${t.duration}</td>
+  </tr>`).join('');
+  document.getElementById('pageInfo').textContent = `${curPage} / ${total} хуудас`;
+  document.getElementById('prevBtn').disabled = curPage <= 1;
+  document.getElementById('nextBtn').disabled = curPage >= total;
+}
+function changePage(d) {
+  const total = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  curPage = Math.max(1, Math.min(total, curPage + d));
+  renderList();
+}
+
+// ── GANTT ──────────────────────────────────────────────────────────────────
+function renderGantt() {
+  const dept = document.getElementById('gDept').value;
+  const qtr  = document.getElementById('gQtr').value;
+  const yr   = ALL_TASKS.length ? Math.min(...ALL_TASKS.map(t => t.start.getFullYear())) : TODAY.getFullYear();
+
+  let sd = new Date(yr, 0, 1), ed = new Date(yr, 11, 31);
+  if (qtr === '1') { sd = new Date(yr,0,1);  ed = new Date(yr,2,31); }
+  if (qtr === '2') { sd = new Date(yr,3,1);  ed = new Date(yr,5,30); }
+  if (qtr === '3') { sd = new Date(yr,6,1);  ed = new Date(yr,8,30); }
+  if (qtr === '4') { sd = new Date(yr,9,1);  ed = new Date(yr,11,31); }
+
+  const data = ALL_TASKS.filter(t =>
+    (!dept || t.dept === dept) && t.finish >= sd && t.start <= ed
+  );
+
+  const totalMs = ed - sd;
+  const months = [];
+  let d = new Date(sd);
+  while (d <= ed) { months.push(new Date(d)); d.setMonth(d.getMonth()+1); }
+
+  const todayPct = Math.max(0, Math.min(100, (TODAY - sd) / totalMs * 100));
+
+  const COLORS = {
+    in_progress: '#228be6', done: '#2f9e44',
+    late: '#e03131', not_started: '#e67700', pending: '#7048e8'
+  };
+
+  function p(date) { return Math.max(0, Math.min(100, (date - sd) / totalMs * 100)); }
+
+  let html = `<div class="gantt-header">
+    <div class="gantt-label-header">Ажлын нэр</div>
+    <div class="gantt-months">
+    ${months.map(m => {
+      const days = new Date(m.getFullYear(), m.getMonth()+1, 0).getDate();
+      return `<div class="gantt-month" style="flex:${days}">${m.getMonth()+1}р сар</div>`;
+    }).join('')}
+    </div>
+  </div>`;
+
+  if (!data.length) {
+    html += `<div class="empty"><div class="empty-icon">📭</div><div class="empty-title">Энэ хугацаанд ажил байхгүй байна</div></div>`;
+  } else {
+    data.slice(0, 100).forEach(t => {
+      const sp = p(t.start), ep = p(t.finish);
+      const clr = COLORS[t.status] || '#adb5bd';
+      const fillW = (ep - sp) * t.pct / 100;
+      html += `<div class="gantt-row">
+        <div class="gantt-task-name" title="${t.name}">${t.name.slice(0,34)}</div>
+        <div class="gantt-bars">
+          <div class="today-line" style="left:${todayPct}%"></div>
+          <div class="gantt-bar" style="left:${sp}%;width:${Math.max(.4,ep-sp)}%;background:${clr};opacity:.3"></div>
+          ${t.pct > 0 ? `<div class="gantt-bar-fill" style="left:${sp}%;width:${Math.max(.2,fillW)}%;background:${clr}"></div>` : ''}
+          ${t.pct > 0 ? `<div class="gantt-pct" style="left:${sp+.5}%;max-width:${Math.max(.2,ep-sp)}%">${t.pct}%</div>` : ''}
+        </div>
+      </div>`;
+    });
+    if (data.length > 100) html += `<div style="padding:10px 14px;font-size:11px;color:var(--text2)">${data.length-100} ажил харагдахгүй байна — хэлтсээр шүүнэ үү</div>`;
+  }
+
+  html += `<div class="gantt-legend">
+    <span><i style="background:#228be6"></i> Явагдаж байна</span>
+    <span><i style="background:#2f9e44"></i> Дууссан</span>
+    <span><i style="background:#e03131"></i> Хоцролттой</span>
+    <span><i style="background:#e67700"></i> Эхлээгүй</span>
+    <span><i style="background:#7048e8"></i> Төлөвлөсөн</span>
+    <span style="color:var(--text2)">│ <span style="color:#e03131;font-weight:500">Улаан зураас</span> = өнөөдөр</span>
+  </div>`;
+
+  document.getElementById('ganttEl').innerHTML = html;
+}
+
+// ── DEPT ───────────────────────────────────────────────────────────────────
+function renderDept() {
+  const stats = DEPTS.map(d => {
+    const dt = ALL_TASKS.filter(t => t.dept === d);
+    return {
+      dept: d, total: dt.length,
+      done:    dt.filter(t => t.status === 'done').length,
+      prog:    dt.filter(t => t.status === 'in_progress').length,
+      late:    dt.filter(t => t.status === 'late').length,
+      nst:     dt.filter(t => t.status === 'not_started').length,
+      pending: dt.filter(t => t.status === 'pending').length,
+      avg:     dt.length ? Math.round(dt.reduce((s,t) => s+t.pct, 0) / dt.length) : 0
+    };
+  });
+
+  const ctx = document.getElementById('deptChart');
+  if (deptChart) { deptChart.destroy(); }
+  deptChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: stats.map(s => s.dept),
+      datasets: [
+        { label: 'Явагдаж байна', data: stats.map(s => s.prog), backgroundColor: '#228be6', borderRadius: 4 },
+        { label: 'Дууссан',       data: stats.map(s => s.done), backgroundColor: '#2f9e44', borderRadius: 4 },
+        { label: 'Хоцролттой',    data: stats.map(s => s.late), backgroundColor: '#e03131', borderRadius: 4 },
+        { label: 'Эхлээгүй',      data: stats.map(s => s.nst),  backgroundColor: '#e67700', borderRadius: 4 },
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'top', labels: { font: { size: 12 }, boxWidth: 12 } } },
+      scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } }
+    }
+  });
+
+  document.getElementById('deptBody').innerHTML = stats.map(s => `<tr>
+    <td style="font-weight:500">${s.dept}</td>
+    <td style="text-align:right">${s.total}</td>
+    <td style="text-align:right;color:#1971c2">${s.prog}</td>
+    <td style="text-align:right;color:#2f9e44">${s.done}</td>
+    <td style="text-align:right;color:#e03131">${s.late}</td>
+    <td style="text-align:right;color:#e67700">${s.nst}</td>
+    <td style="text-align:right;color:#7048e8">${s.pending}</td>
+    <td style="text-align:right">
+      <div style="display:flex;align-items:center;gap:8px;justify-content:flex-end">
+        <span style="font-weight:500">${s.avg}%</span>
+        <div class="pbar" style="width:80px;display:inline-block">
+          <div class="pfill" style="width:${s.avg}%;background:${s.avg>=70?'#2f9e44':s.avg>=30?'#228be6':'#e03131'}"></div>
+        </div>
+      </div>
+    </td>
+  </tr>`).join('');
+}
+
+// ── ALERTS ─────────────────────────────────────────────────────────────────
+function renderAlerts() {
+  const late = ALL_TASKS.filter(t => t.status === 'late');
+  const nst  = ALL_TASKS.filter(t => t.status === 'not_started');
+  const soon = ALL_TASKS.filter(t => {
+    if (t.status !== 'in_progress' && t.status !== 'pending') return false;
+    const days = (t.finish - TODAY) / 86400000;
+    return days >= 0 && days <= 30;
+  });
+
+  let html = '';
+
+  html += `<div class="sec-title" style="color:var(--red)">⛔ Хоцролттой ажлууд (${late.length})</div>`;
+  if (!late.length) html += `<div class="alert alert-g">Хоцролттой ажил байхгүй байна ✓</div>`;
+  else late.forEach(t => {
+    const days = Math.round((TODAY - t.finish) / 86400000);
+    html += `<div class="alert alert-r"><strong>${t.dept || '—'}</strong> — ${t.name.slice(0,90)} <span style="font-weight:600">(${days} өдөр хоцорсон)</span></div>`;
+  });
+
+  html += `<div class="sec-title" style="color:var(--amber)">⚠️ 30 хоногт дуусах ажлууд (${soon.length})</div>`;
+  if (!soon.length) html += `<div class="alert alert-g">Ойрхон дуусах ажил байхгүй</div>`;
+  else soon.slice(0, 20).forEach(t => {
+    const days = Math.round((t.finish - TODAY) / 86400000);
+    html += `<div class="alert alert-y"><strong>${t.dept || '—'}</strong> — ${t.name.slice(0,90)} — <span style="font-weight:600">${days} өдрийн дараа дуусна</span> (${t.pct}% биелсэн)</div>`;
+  });
+
+  html += `<div class="sec-title" style="color:var(--amber)">📌 Эхлэх ёстой байсан ч эхлээгүй (${nst.length})</div>`;
+  nst.slice(0, 20).forEach(t => {
+    const days = Math.round((TODAY - t.start) / 86400000);
+    html += `<div class="alert alert-y"><strong>${t.dept || '—'}</strong> — ${t.name.slice(0,90)} — <span style="font-weight:600">${fmtDate(t.start)}-аас эхлэх байсан (${days} өдөр болжээ)</span></div>`;
+  });
+  if (nst.length > 20) html += `<div style="font-size:12px;color:var(--text2);padding:8px">... болон бусад ${nst.length-20} ажил</div>`;
+
+  document.getElementById('alerts').innerHTML = html;
+}
+
+// ── TABS ───────────────────────────────────────────────────────────────────
+
+function fmtT(v){
+  if(!v||v===0)return'—';
+  return Math.round(v).toLocaleString('mn-MN')+' ₮';
+}
+function fmtTm(v){
+  if(!v||v===0)return'—';
+  if(Math.abs(v)>=1000000) return (v/1000000).toFixed(1)+' сая ₮';
+  return Math.round(v).toLocaleString('mn-MN')+' ₮';
+}
+
+function renderCost(){
+  var ct=ALL_TASKS.filter(function(t){return t.cost>0;}).sort(function(a,b){return b.cost-a.cost;});
+  var total=ct.reduce(function(s,t){return s+t.cost;},0);
+  var actual=ct.reduce(function(s,t){return s+(t.actual_cost||0);},0);
+  var SL={done:'Дууссан',in_progress:'Явагдаж байна',late:'Хоцролттой',not_started:'Эхлээгүй',pending:'Төлөвлөсөн'};
+  var SC={done:'#2f9e44',in_progress:'#378ADD',late:'#E24B4A',not_started:'#BA7517',pending:'#7048e8'};
+
+  var dm={};
+  ct.forEach(function(t){
+    if(!dm[t.dept])dm[t.dept]={dept:t.dept,cost:0,actual:0,count:0};
+    dm[t.dept].cost+=t.cost; dm[t.dept].actual+=(t.actual_cost||0); dm[t.dept].count++;
+  });
+  var ds=Object.values(dm).sort(function(a,b){return b.cost-a.cost;});
+
+  var h='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:16px">';
+  h+='<div style="background:#e7f5ff;border:1px solid #74c0fc;border-radius:10px;padding:14px"><div style="font-size:10px;font-weight:700;color:#1971c2;text-transform:uppercase;margin-bottom:5px">НИЙТ ТӨЛӨВЛӨСӨН</div>';
+  h+='<div style="font-size:20px;font-weight:700;color:#1971c2">'+fmtTm(total)+'</div>';
+  h+='<div style="font-size:11px;color:#1971c2;margin-top:2px">'+ct.length+' ажил · '+total.toLocaleString('mn-MN')+' ₮</div></div>';
+
+  // Хэмнэл/хэтрэлт карт
+  if(actual>0){
+    var diff = total - actual;
+    var isOver = diff < 0;
+    h+='<div style="background:'+(isOver?'#fff5f5':'#ebfbee')+';border:1px solid '+(isOver?'#ffa8a8':'#69db7c')+';border-radius:10px;padding:14px">';
+    h+='<div style="font-size:10px;font-weight:700;color:'+(isOver?'#c92a2a':'#2f9e44')+';text-transform:uppercase;margin-bottom:5px">'+(isOver?'⚠ ХЭТРЭЛТ':'✅ ХЭМНЭЛТ')+'</div>';
+    h+='<div style="font-size:20px;font-weight:700;color:'+(isOver?'#c92a2a':'#2f9e44')+'">'+fmtTm(Math.abs(diff))+'</div>';
+    h+='<div style="font-size:11px;margin-top:2px;color:'+(isOver?'#c92a2a':'#2f9e44')+'">'+(isOver?'Хэтэрсэн: ':'Хэмнэсэн: ')+Math.abs(diff).toLocaleString('mn-MN')+' ₮</div></div>';
+  } else {
+    h+='<div style="background:#fff9db;border:1px solid #ffd43b;border-radius:10px;padding:14px">';
+    h+='<div style="font-size:10px;font-weight:700;color:#e67700;text-transform:uppercase;margin-bottom:5px">ХАМГИЙН ИХ</div>';
+    h+='<div style="font-size:16px;font-weight:700;color:#e67700">'+fmtT(ct[0]?ct[0].cost:0)+'</div>';
+    h+='<div style="font-size:11px;color:#e67700;margin-top:2px">'+(ct[0]?ct[0].name.slice(0,28)+'...':'')+'</div></div>';
+  }
+
+  // Бодит зардал карт
+  h+='<div style="background:#f3f0ff;border:1px solid #b197fc;border-radius:10px;padding:14px">';
+  h+='<div style="font-size:10px;font-weight:700;color:#7048e8;text-transform:uppercase;margin-bottom:5px">БОДИТ ЗАРДАЛ</div>';
+  h+='<div style="font-size:20px;font-weight:700;color:#7048e8">'+(actual>0?fmtTm(actual):'Оруулаагүй')+'</div>';
+  h+='<div style="font-size:11px;color:#7048e8;margin-top:2px">'+(actual>0?actual.toLocaleString('mn-MN')+' ₮':'Actual Cost-г оруулна уу')+'</div></div>';
+  ds.forEach(function(s){
+    var pct=Math.round(s.cost/total*100);
+    h+='<div style="background:#f8f9fa;border:1px solid #dee2e6;border-radius:10px;padding:14px">';
+    h+='<div style="font-size:10px;font-weight:700;color:#495057;text-transform:uppercase;margin-bottom:5px">'+s.dept+'</div>';
+    h+='<div style="font-size:18px;font-weight:700;color:#228be6">'+fmtTm(s.cost)+'</div>';
+    h+='<div style="font-size:11px;color:#6c757d;margin-top:2px">Нийт зардлын '+pct+'%</div></div>';
+  });
+  h+='</div>';
+
+  // Dept table
+  h+='<div style="background:white;border:1px solid #dee2e6;border-radius:10px;overflow:hidden;margin-bottom:14px">';
+  h+='<div style="padding:10px 14px;font-size:13px;font-weight:600;border-bottom:1px solid #dee2e6;background:#f8f9fa">🏢 Хэлтэс бүрийн зардал</div>';
+  h+='<table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr style="background:#f8f9fa">';
+  h+='<th style="padding:8px 12px;text-align:left;border-bottom:1px solid #dee2e6;font-size:11px;font-weight:600;color:#6c757d">Хэлтэс</th>';
+  h+='<th style="padding:8px 12px;text-align:right;border-bottom:1px solid #dee2e6;font-size:11px;font-weight:600;color:#6c757d">Ажил</th>';
+  h+='<th style="padding:8px 12px;text-align:right;border-bottom:1px solid #dee2e6;font-size:11px;font-weight:600;color:#6c757d">Төлөвлөсөн</th>';
+  h+='<th style="padding:8px 12px;text-align:right;border-bottom:1px solid #dee2e6;font-size:11px;font-weight:600;color:#6c757d">Бодит</th>';
+  h+='<th style="padding:8px 12px;text-align:right;border-bottom:1px solid #dee2e6;font-size:11px;font-weight:600;color:#6c757d">Зөрүү</th>';
+  h+='<th style="padding:8px 12px;border-bottom:1px solid #dee2e6;font-size:11px;font-weight:600;color:#6c757d;width:140px">Эзлэх хувь</th>';
+  h+='</tr></thead><tbody>';
+  ds.forEach(function(s){
+    var pct=Math.round(s.cost/total*100);
+    var diff=s.actual>0?s.cost-s.actual:null;
+    h+='<tr style="border-bottom:1px solid #f1f3f5">';
+    h+='<td style="padding:8px 12px;font-weight:600">'+s.dept+'</td>';
+    h+='<td style="padding:8px 12px;text-align:right;color:#6c757d">'+s.count+'</td>';
+    h+='<td style="padding:8px 12px;text-align:right;font-weight:600;color:#228be6">'+fmtT(s.cost)+'</td>';
+    h+='<td style="padding:8px 12px;text-align:right">'+(s.actual>0?fmtT(s.actual):'<span style="color:#adb5bd">—</span>')+'</td>';
+    h+='<td style="padding:8px 12px;text-align:right">'+(diff!==null?(diff<0?'<span style="color:#c92a2a;font-weight:600">'+Math.abs(diff).toLocaleString('mn-MN')+' ₮ хэтрэлт</span>':'<span style="color:#2f9e44;font-weight:600">'+diff.toLocaleString('mn-MN')+' ₮ хэмнэлт</span>'):'<span style="color:#adb5bd">—</span>')+'</td>';
+    h+='<td style="padding:8px 12px"><div style="display:flex;align-items:center;gap:6px"><div style="flex:1;background:#f1f3f5;border-radius:3px;height:8px"><div style="width:'+pct+'%;height:100%;background:#228be6;border-radius:3px"></div></div><span style="font-size:11px;font-weight:600;min-width:28px">'+pct+'%</span></div></td>';
+    h+='</tr>';
+  });
+  var tdiff=actual>0?total-actual:null;
+  h+='<tr style="background:#f8f9fa;font-weight:600"><td style="padding:8px 12px">Нийт дүн</td><td style="padding:8px 12px;text-align:right;color:#6c757d">'+ct.length+'</td>';
+  h+='<td style="padding:8px 12px;text-align:right;color:#228be6;font-size:13px">'+fmtT(total)+'</td>';
+  h+='<td style="padding:8px 12px;text-align:right">'+(actual>0?fmtT(actual):'<span style="color:#adb5bd;font-weight:400;font-size:11px">Actual Cost оруулаагүй</span>')+'</td>';
+  h+='<td style="padding:8px 12px;text-align:right">'+(tdiff!==null?(tdiff<0?'<span style="color:#c92a2a">'+Math.abs(tdiff).toLocaleString('mn-MN')+' ₮ хэтрэлт</span>':'<span style="color:#2f9e44">'+tdiff.toLocaleString('mn-MN')+' ₮ хэмнэлт</span>'):'—')+'</td><td></td></tr>';
+  h+='</tbody></table></div>';
+
+  // Task list
+  h+='<div style="background:white;border:1px solid #dee2e6;border-radius:10px;overflow:hidden">';
+  h+='<div style="padding:10px 14px;font-size:13px;font-weight:600;border-bottom:1px solid #dee2e6;background:#f8f9fa">📋 Зардалтай ажлуудын жагсаалт ('+ct.length+' ажил)</div>';
+  h+='<table style="width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed"><thead><tr style="background:#f8f9fa">';
+  h+='<th style="padding:8px 12px;text-align:left;border-bottom:1px solid #dee2e6;font-size:11px;font-weight:600;color:#6c757d;width:38%">Ажлын нэр</th>';
+  h+='<th style="padding:8px 12px;text-align:left;border-bottom:1px solid #dee2e6;font-size:11px;font-weight:600;color:#6c757d;width:12%">Хэлтэс</th>';
+  h+='<th style="padding:8px 12px;text-align:left;border-bottom:1px solid #dee2e6;font-size:11px;font-weight:600;color:#6c757d;width:10%">Төлөв</th>';
+  h+='<th style="padding:8px 12px;text-align:right;border-bottom:1px solid #dee2e6;font-size:11px;font-weight:600;color:#6c757d;width:14%">Төлөвлөсөн</th>';
+  h+='<th style="padding:8px 12px;text-align:right;border-bottom:1px solid #dee2e6;font-size:11px;font-weight:600;color:#6c757d;width:13%">Бодит</th>';
+  h+='<th style="padding:8px 12px;text-align:right;border-bottom:1px solid #dee2e6;font-size:11px;font-weight:600;color:#6c757d;width:13%">Зөрүү</th>';
+  h+='</tr></thead><tbody>';
+  ct.forEach(function(t){
+    var clr=SC[t.status]||'#adb5bd';
+    var lbl=SL[t.status]||'—';
+    var diff=t.actual_cost>0?t.cost-t.actual_cost:null;
+    h+='<tr style="border-bottom:1px solid #f1f3f5">';
+    h+='<td style="padding:7px 12px;white-space:normal;word-break:break-word;line-height:1.4">'+t.name+'</td>';
+    h+='<td style="padding:7px 12px;color:#6c757d;font-size:11px">'+t.dept+'</td>';
+    h+='<td style="padding:7px 12px"><span style="background:'+clr+'22;color:'+clr+';padding:2px 7px;border-radius:20px;font-size:10px;font-weight:600">'+lbl+'</span></td>';
+    h+='<td style="padding:7px 12px;text-align:right;font-weight:600;color:#228be6">'+fmtT(t.cost)+'</td>';
+    h+='<td style="padding:7px 12px;text-align:right">'+(t.actual_cost>0?fmtT(t.actual_cost):'<span style="color:#adb5bd">—</span>')+'</td>';
+    h+='<td style="padding:7px 12px;text-align:right">'+(diff!==null?(diff<0?'<span style="color:#c92a2a;font-weight:600">'+Math.abs(diff).toLocaleString('mn-MN')+' ₮ хэтрэлт</span>':'<span style="color:#2f9e44;font-weight:600">'+diff.toLocaleString('mn-MN')+' ₮ хэмнэлт</span>'):'<span style="color:#adb5bd">—</span>')+'</td>';
+    h+='</tr>';
+  });
+  h+='</tbody></table></div>';
+  document.getElementById('costContent').innerHTML=h;
+}
+
+function showTab(name, btn) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(name).classList.add('active');
+  if (name === 'gantt')  renderGantt();
+  if (name === 'dept')   renderDept();
+  if (name === 'alerts') renderAlerts();
+  if (name === 'cost')   renderCost();
+}
+
+function exportPDF() {
+  if (typeof window.jspdf === 'undefined') {
+    alert('PDF библиотек ачаалагдаагүй байна. Интернет холболтоо шалгана уу.');
+    return;
+  }
+  var btn = document.getElementById('pdfBtn');
+  btn.textContent = '⏳ Бэлтгэж байна...';
+  btn.disabled = true;
+
+  var doc = new window.jspdf.jsPDF({orientation:'portrait', unit:'mm', format:'a4'});
+  var pageW = 210, pageH = 297, margin = 14;
+  var usableW = pageW - margin*2;
+  var today = new Date().toLocaleDateString('mn-MN');
+
+  // Colors
+  var BLUE = [34,139,230], GREEN = [47,158,68], RED = [224,49,49],
+      AMBER = [230,103,0], PURPLE = [112,72,232], DARK = [26,26,46],
+      GRAY = [108,117,125], LGRAY = [241,243,245], WHITE = [255,255,255];
+
+  function addPage() { doc.addPage(); return margin; }
+
+  function drawRect(x,y,w,h,r,fill,stroke) {
+    doc.setFillColor(...fill);
+    if(stroke) doc.setDrawColor(...stroke); else doc.setDrawColor(...fill);
+    doc.roundedRect(x,y,w,h,r,r,stroke?'FD':'F');
+  }
+
+  function text(txt, x, y, opts) {
+    opts = opts || {};
+    doc.setFontSize(opts.size||9);
+    doc.setFont('helvetica', opts.bold?'bold':'normal');
+    doc.setTextColor(...(opts.color||DARK));
+    if(opts.align==='center') doc.text(txt, x, y, {align:'center'});
+    else if(opts.align==='right') doc.text(txt, x, y, {align:'right'});
+    else doc.text(txt, x, y);
+  }
+
+  function splitText(txt, maxW, size) {
+    doc.setFontSize(size||9);
+    return doc.splitTextToSize(txt, maxW);
+  }
+
+  // ── ХУУДАС 1: Гарчиг + Статистик ─────────────────────
+  var y = margin;
+
+  // Header
+  drawRect(0,0,pageW,22,0,DARK);
+  text('CONSOLIDATED PLAN 2026', pageW/2, 10, {size:14,bold:true,color:WHITE,align:'center'});
+  text('Төслийн удирдлагын дашбоард · '+today, pageW/2, 17, {size:8,color:[180,200,220],align:'center'});
+  y = 28;
+
+  // Stat cards
+  var total=ALL_TASKS.length,
+      done=ALL_TASKS.filter(function(t){return t.status==='done';}).length,
+      prog=ALL_TASKS.filter(function(t){return t.status==='in_progress';}).length,
+      late=ALL_TASKS.filter(function(t){return t.status==='late';}).length,
+      nst=ALL_TASKS.filter(function(t){return t.status==='not_started';}).length,
+      pend=ALL_TASKS.filter(function(t){return t.status==='pending';}).length,
+      avg=total?Math.round(ALL_TASKS.reduce(function(s,t){return s+t.pct;},0)/total):0,
+      totalCost=ALL_TASKS.reduce(function(s,t){return s+(t.cost||0);},0);
+
+  var stats=[
+    ['Нийт ажил',total,DARK,[230,240,255]],
+    ['Явагдаж байна',prog,BLUE,[230,241,255]],
+    ['Дууссан',done,GREEN,[235,251,238]],
+    ['Хоцролттой',late,RED,[255,245,245]],
+    ['Эхлээгүй',nst,AMBER,[255,249,219]],
+    ['Төлөвлөсөн',pend,PURPLE,[243,240,255]],
+    ['Дундаж биелэлт',avg+'%',[20,80,120],[230,241,255]],
+    ['Нийт зардал',(totalCost/1000000).toFixed(1)+'сая₮',GREEN,[235,251,238]]
+  ];
+
+  var cw=(usableW-6)/4, ch=18;
+  for(var i=0;i<stats.length;i++){
+    var col=i%4, row=Math.floor(i/4);
+    var cx=margin+col*(cw+2), cy=y+row*(ch+2);
+    drawRect(cx,cy,cw,ch,2,stats[i][3]);
+    text(stats[i][1].toString(), cx+cw/2, cy+7, {size:11,bold:true,color:stats[i][2],align:'center'});
+    text(stats[i][0], cx+cw/2, cy+13, {size:7,color:GRAY,align:'center'});
+  }
+  y += Math.ceil(stats.length/4)*(ch+2)+6;
+
+  // ── Хэлтэсийн дүн ─────────────────────────────────────
+  drawRect(margin,y,usableW,6,2,DARK);
+  text('ХЭЛТЭС БҮРИЙН ДҮН', margin+2, y+4.5, {size:8,bold:true,color:WHITE});
+  y += 8;
+
+  var depts={};
+  ALL_TASKS.forEach(function(t){
+    if(!depts[t.dept])depts[t.dept]={total:0,done:0,prog:0,late:0,nst:0,pend:0,pct:0,cost:0};
+    depts[t.dept].total++;
+    depts[t.dept][t.status==='in_progress'?'prog':t.status==='not_started'?'nst':t.status]=
+      (depts[t.dept][t.status==='in_progress'?'prog':t.status==='not_started'?'nst':t.status]||0)+1;
+    depts[t.dept].pct+=t.pct;
+    depts[t.dept].cost+=(t.cost||0);
+  });
+
+  var dCols=[['Хэлтэс',48],['Нийт',14],['Явагдаж',18],['Дууссан',16],['Хоцролттой',20],['Биелэлт',16],['Зардал',28]];
+  var dxs=[], dx=margin;
+  dCols.forEach(function(c){dxs.push(dx);dx+=c[1];});
+
+  // Header row
+  drawRect(margin,y,usableW,6,0,LGRAY);
+  dCols.forEach(function(c,i){
+    text(c[0],dxs[i]+1,y+4.5,{size:7,bold:true,color:GRAY});
+  });
+  y+=7;
+
+  Object.keys(depts).sort().forEach(function(dept,ri){
+    var d=depts[dept];
+    var avgD=Math.round(d.pct/d.total);
+    var costStr=d.cost>0?(d.cost/1000000).toFixed(1)+'сая₮':'—';
+    if(ri%2===0){drawRect(margin,y-0.5,usableW,6.5,0,[248,249,250]);}
+    var row=[dept,d.total,d.prog||0,d.done||0,d.late||0,avgD+'%',costStr];
+    row.forEach(function(v,i){
+      var clr = i===3&&d.late>0?RED : DARK;
+      text(v.toString(),dxs[i]+1,y+4.5,{size:8,color:clr,bold:i===0});
+    });
+    y+=7;
+  });
+  y+=4;
+
+  // ── ХУУДАС 2: Ажлын жагсаалт ──────────────────────────
+  doc.addPage();
+  y=margin;
+  drawRect(0,0,pageW,12,0,DARK);
+  text('АЖЛЫН ЖАГСААЛТ ('+ALL_TASKS.length+' ажил)', pageW/2,8,{size:11,bold:true,color:WHITE,align:'center'});
+  y=16;
+
+  var STATUS_MN={done:'Дууссан',in_progress:'Явагдаж байна',late:'Хоцролттой',not_started:'Эхлээгүй',pending:'Төлөвлөсөн'};
+  var STATUS_CLR={done:GREEN,in_progress:BLUE,late:RED,not_started:AMBER,pending:PURPLE};
+  var tCols=[['Ажлын нэр',85],['Хэлтэс',28],['Эхлэх',18],['Дуусах',18],['%',10],['Төлөв',26]];
+  var txs=[], tx=margin;
+  tCols.forEach(function(c){txs.push(tx);tx+=c[1];});
+
+  drawRect(margin,y,usableW,6,0,DARK);
+  tCols.forEach(function(c,i){text(c[0],txs[i]+1,y+4.5,{size:7,bold:true,color:WHITE});});
+  y+=7;
+
+  ALL_TASKS.forEach(function(t,ri){
+    var lines=splitText(t.name,83,7.5);
+    var rowH=Math.max(6,lines.length*4.5);
+    if(y+rowH>pageH-margin){
+      doc.addPage(); y=margin;
+      drawRect(margin,y,usableW,6,0,DARK);
+      tCols.forEach(function(c,i){text(c[0],txs[i]+1,y+4.5,{size:7,bold:true,color:WHITE});});
+      y+=7;
+    }
+    if(ri%2===0) drawRect(margin,y-0.5,usableW,rowH+1,0,[248,249,250]);
+    doc.setFontSize(7.5); doc.setFont('helvetica','normal'); doc.setTextColor(...DARK);
+    doc.text(lines,txs[0]+1,y+4);
+    text(t.dept,txs[1]+1,y+4,{size:7.5});
+    text(t.start?t.start.slice(5).replace('-','/'):'-',txs[2]+1,y+4,{size:7.5});
+    text(t.finish?t.finish.slice(5).replace('-','/'):'-',txs[3]+1,y+4,{size:7.5});
+    text(t.pct+'%',txs[4]+1,y+4,{size:7.5,bold:true,color:t.pct>=100?GREEN:t.pct>0?BLUE:GRAY});
+    text(STATUS_MN[t.status]||'',txs[5]+1,y+4,{size:7,bold:true,color:STATUS_CLR[t.status]||GRAY});
+    y+=rowH+1;
+  });
+
+  // ── ХУУДАС 3: Зардал ────────────────────────────────────
+  var costTasks=ALL_TASKS.filter(function(t){return t.cost>0;}).sort(function(a,b){return b.cost-a.cost;});
+  if(costTasks.length>0){
+    doc.addPage(); y=margin;
+    drawRect(0,0,pageW,12,0,GREEN);
+    text('ЗАРДЛЫН ШИНЖИЛГЭЭ', pageW/2,8,{size:11,bold:true,color:WHITE,align:'center'});
+    y=16;
+
+    var tcost=costTasks.reduce(function(s,t){return s+t.cost;},0);
+    var tactual=costTasks.reduce(function(s,t){return s+(t.actual_cost||0);},0);
+
+    // Summary
+    var sCards=[
+      ['Нийт төлөвлөсөн',(tcost/1000000).toFixed(1)+' сая ₮',BLUE,[230,241,255]],
+      ['Бодит зардал',tactual>0?(tactual/1000000).toFixed(1)+' сая ₮':'Оруулаагүй',GREEN,[235,251,238]],
+      ['Зардалтай ажил',costTasks.length+' ажил',PURPLE,[243,240,255]],
+      ['Зөрүү',tactual>0?((tactual-tcost)>0?'+'+(((tactual-tcost)/1000000).toFixed(1))+' сая хэтрэлт':((tcost-tactual)/1000000).toFixed(1)+' сая хэмнэлт'):'—',tactual>0&&tactual>tcost?RED:GREEN,[235,251,238]]
+    ];
+    var sw=(usableW-4)/4;
+    sCards.forEach(function(s,i){
+      var cx=margin+i*(sw+1.5);
+      drawRect(cx,y,sw,16,2,s[3]);
+      text(s[0],cx+sw/2,y+5.5,{size:7,color:GRAY,align:'center'});
+      text(s[1],cx+sw/2,y+12,{size:9,bold:true,color:s[2],align:'center'});
+    });
+    y+=20;
+
+    var zCols=[['Ажлын нэр',80],['Хэлтэс',28],['Төлөвлөсөн (₮)',30],['Бодит (₮)',28],['Зөрүү',20]];
+    var zxs=[], zx=margin;
+    zCols.forEach(function(c){zxs.push(zx);zx+=c[1];});
+    drawRect(margin,y,usableW,6,0,GREEN);
+    zCols.forEach(function(c,i){text(c[0],zxs[i]+1,y+4.5,{size:7,bold:true,color:WHITE});});
+    y+=7;
+
+    costTasks.forEach(function(t,ri){
+      var lines=splitText(t.name,78,7.5);
+      var rowH=Math.max(6,lines.length*4.5);
+      if(y+rowH>pageH-margin){
+        doc.addPage(); y=margin;
+        drawRect(margin,y,usableW,6,0,GREEN);
+        zCols.forEach(function(c,i){text(c[0],zxs[i]+1,y+4.5,{size:7,bold:true,color:WHITE});});
+        y+=7;
+      }
+      if(ri%2===0) drawRect(margin,y-0.5,usableW,rowH+1,0,[248,249,250]);
+      doc.setFontSize(7.5); doc.setFont('helvetica','normal'); doc.setTextColor(...DARK);
+      doc.text(lines,zxs[0]+1,y+4);
+      text(t.dept,zxs[1]+1,y+4,{size:7.5});
+      text(t.cost.toLocaleString(),zxs[2]+1,y+4,{size:7.5,bold:true,color:BLUE});
+      text(t.actual_cost>0?t.actual_cost.toLocaleString():'—',zxs[3]+1,y+4,{size:7.5,color:GREEN});
+      var diff=t.actual_cost>0?t.actual_cost-t.cost:null;
+      text(diff!==null?(diff>0?'+'+diff.toLocaleString():diff.toLocaleString()):'—',zxs[4]+1,y+4,{size:7,bold:diff!==null,color:diff>0?RED:diff<0?GREEN:GRAY});
+      y+=rowH+1;
+    });
+  }
+
+  // ── ХУУДАС 4: Анхааруулга ──────────────────────────────
+  doc.addPage(); y=margin;
+  drawRect(0,0,pageW,12,0,RED);
+  text('АНХААРУУЛГА', pageW/2,8,{size:11,bold:true,color:WHITE,align:'center'});
+  y=16;
+
+  var lateTasks=ALL_TASKS.filter(function(t){return t.status==='late';});
+  var nstTasks=ALL_TASKS.filter(function(t){return t.status==='not_started';});
+  var todayD=new Date();
+  var soonTasks=ALL_TASKS.filter(function(t){
+    if(t.status!=='in_progress'&&t.status!=='pending')return false;
+    var d=new Date(t.finish);
+    var diff=(d-todayD)/(86400000);
+    return diff>=0&&diff<=30;
+  });
+
+  var sections=[
+    ['⛔ ХОЦРОЛТТОЙ АЖЛУУД',lateTasks,RED],
+    ['⚠ 30 ХОНОГТ ДУУСАХ',soonTasks,AMBER],
+    ['📌 ЭХЛЭХ ЁСТОЙ БАЙСАН Ч ЭХЛЭЭГҮЙ',nstTasks,AMBER]
+  ];
+
+  sections.forEach(function(sec){
+    var title=sec[0], list=sec[1], clr=sec[2];
+    drawRect(margin,y,usableW,7,2,clr);
+    text(title+' ('+list.length+' ажил)',margin+3,y+5,{size:8,bold:true,color:WHITE});
+    y+=9;
+    if(list.length===0){
+      text('✓ Байхгүй байна',margin+4,y+4,{size:8,color:GREEN});
+      y+=8;
+    } else {
+      list.forEach(function(t,ri){
+        if(y>pageH-20){doc.addPage();y=margin;}
+        if(ri%2===0) drawRect(margin,y-0.5,usableW,7,0,[248,249,250]);
+        var lines=splitText(t.name,115,8);
+        doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.setTextColor(...DARK);
+        doc.text(lines[0]+(lines.length>1?'...':''),margin+3,y+4.5);
+        text('['+t.dept+']',pageW-margin-2,y+4.5,{size:7,color:GRAY,align:'right'});
+        y+=7.5;
+      });
+    }
+    y+=3;
+  });
+
+  // Page numbers
+  var totalPages=doc.getNumberOfPages();
+  for(var p=1;p<=totalPages;p++){
+    doc.setPage(p);
+    text('Consolidated Plan 2026 · '+today+' · '+p+'/'+totalPages,
+         pageW/2, pageH-5, {size:7,color:GRAY,align:'center'});
+  }
+
+  doc.save('Consolidated_Plan_2026_'+today.replace(/\//g,'-')+'.pdf');
+  btn.textContent = '📄 PDF татах';
+  btn.disabled = false;
+}
+
 </script>
 </body>
 </html>
